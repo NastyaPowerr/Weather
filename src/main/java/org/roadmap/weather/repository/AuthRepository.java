@@ -11,15 +11,33 @@ public class AuthRepository {
             INSERT INTO weather.users(login, password)
             VALUES (?, ?)
             """;
+    private static final String GET_USER = """
+            SELECT id, login, password
+            FROM weather.users
+            WHERE login = ?
+            """;
 
     public AuthRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     public void save(User userToSave) {
-        jdbcTemplate.update(SAVE,
+        jdbcTemplate.update(
+                SAVE,
                 userToSave.getLogin(),
                 userToSave.getPassword()
+        );
+    }
+
+    public User getUser(String login) {
+        return jdbcTemplate.queryForObject(
+                GET_USER,
+                (rs, rowNum) -> {
+                    Integer id = rs.getInt("id");
+                    String password = rs.getString("password");
+                    return new User(id, login, password);
+                },
+                login
         );
     }
 }

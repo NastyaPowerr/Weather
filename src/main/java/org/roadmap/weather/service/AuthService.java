@@ -15,13 +15,18 @@ public class AuthService {
     }
 
     public void register(UserDto user) {
-        // check if user exists in DB
-        // шифруем пароль
-        // маппим из ДТО в энтити
-        // сохраняем
         String hashPassword = getEncryptedPassword(user.password());
         User userToSave = new User(user.login(), hashPassword);
         authRepository.save(userToSave);
+    }
+
+    public String authorize(UserDto user) {
+        User foundUser = authRepository.getUser(user.login());
+        BCrypt.Result result = BCrypt.verifyer().verify(user.password().toCharArray(), foundUser.getPassword());
+        if (result.verified) {
+            return "session";
+        }
+        return "wrong login or password";
     }
 
     private static String getEncryptedPassword(String password) {
