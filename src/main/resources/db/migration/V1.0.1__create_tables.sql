@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS weather.users
 (
     id       SERIAL PRIMARY KEY,
     login    VARCHAR(50) UNIQUE,
-    password VARCHAR(50) NOT NULL
+    password VARCHAR(60) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS weather.locations

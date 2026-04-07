@@ -21,6 +21,8 @@
         <spring-webmvc.version>7.0.6</spring-webmvc.version>
         <spring-jdbc.version>7.0.6</spring-jdbc.version>
         <spring-context.version>7.0.6</spring-context.version>
+        <bcrypt.version>0.10.2</bcrypt.version>
+        <jackson-databind.version>2.21.2</jackson-databind.version>
     </properties>
 
     <dependencies>
@@ -64,6 +66,18 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>${spring-context.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>at.favre.lib</groupId>
+            <artifactId>bcrypt</artifactId>
+            <version>${bcrypt.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-databind.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

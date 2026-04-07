@@ -3,11 +3,14 @@ package org.roadmap.weather;
 import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.sql.DataSource;
 
 @Configuration
+@EnableWebMvc
 public class DatabaseConfig {
     @Bean
     public DataSource dataSource() {
@@ -28,5 +31,10 @@ public class DatabaseConfig {
                 .defaultSchema("weather")
                 .baselineOnMigrate(true)
                 .load();
+    }
+
+    @Bean
+    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
     }
 }
