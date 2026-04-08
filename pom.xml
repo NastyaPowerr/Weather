@@ -23,6 +23,7 @@
         <spring-context.version>7.0.6</spring-context.version>
         <bcrypt.version>0.10.2</bcrypt.version>
         <jackson-databind.version>2.21.2</jackson-databind.version>
+        <maven.compiler.version>3.15.0</maven.compiler.version>
     </properties>
 
     <dependencies>
@@ -89,6 +90,16 @@
                 <version>${maven-war-plugin.version}</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.version}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
         </plugins>
