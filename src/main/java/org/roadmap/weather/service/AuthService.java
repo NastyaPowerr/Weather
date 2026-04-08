@@ -1,16 +1,21 @@
 package org.roadmap.weather.service;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.entity.User;
 import org.roadmap.weather.repository.AuthRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AuthService {
+    private final SessionService sessionService;
     private final AuthRepository authRepository;
 
-    public AuthService(AuthRepository authRepository) {
+    public AuthService(AuthRepository authRepository, SessionService sessionService) {
+        this.sessionService = sessionService;
         this.authRepository = authRepository;
     }
 
@@ -20,13 +25,13 @@ public class AuthService {
         authRepository.save(userToSave);
     }
 
-    public String authorize(UserDto user) {
+    public Optional<SessionDto> authorize(UserDto user) {
         User foundUser = authRepository.getUser(user.login());
         BCrypt.Result result = BCrypt.verifyer().verify(user.password().toCharArray(), foundUser.getPassword());
         if (result.verified) {
-            return "session";
+            return Optional.of(sessionService.create(foundUser.getId()));
         }
-        return "wrong login or password";
+        return Optional.empty();
     }
 
     private static String getEncryptedPassword(String password) {
