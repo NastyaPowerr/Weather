@@ -1,4 +1,4 @@
-package org.roadmap.weather;
+package org.roadmap.weather.config;
 
 import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;
