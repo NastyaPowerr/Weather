@@ -5,16 +5,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.Weather;
-import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.service.SessionService;
 import org.roadmap.weather.service.WeatherService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController
+@Controller
 public class WeatherController {
     private final WeatherService weatherService;
     private final SessionService sessionService;
@@ -24,28 +24,42 @@ public class WeatherController {
         this.sessionService = sessionService;
     }
 
-    @GetMapping("/location/test")
-    public List<LocationDto> testSeeCityInfo(
+    @GetMapping("/search")
+    public String findLocations(
             @RequestParam String name,
             HttpServletRequest request,
-            HttpServletResponse response
+            HttpServletResponse response,
+            Model model
     ) {
         Integer userId = extractUserId(request);
         if (userId == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
+            return "redirect:/auth/sign-in";
         }
-        return weatherService.findByName(name, userId);
+        List<LocationDto> locations = weatherService.findByName(name, userId);
+        for (LocationDto location : locations) {
+            System.out.println(location);
+        }
+        model.addAttribute("locations", locations);
+        model.addAttribute("locationName", name);
+        return "search-results";
     }
 
-    @GetMapping("/weather/test")
-    public List<Weather> testSeeWeatherInfo(HttpServletRequest request, HttpServletResponse response) {
+    @GetMapping("/")
+    public String getWeathers(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Model model
+    ) {
         Integer userId = extractUserId(request);
         if (userId == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
+            model.addAttribute("weathers", List.of());
+            return "index";
         }
-        return weatherService.getWeathersForUser(userId);
+        List<Weather> weathers = weatherService.getWeathersForUser(userId);
+        model.addAttribute("weathers", weathers);
+        return "index";
     }
 
     private Integer extractUserId(HttpServletRequest request) {

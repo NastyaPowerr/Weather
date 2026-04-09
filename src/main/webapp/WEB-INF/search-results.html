@@ -18,7 +18,6 @@
             <span class="navbar-text me-3">zhukovsd</span>
             <button class="btn btn-outline-danger">Sign out</button>
         </div>
-
         <a href="/auth/sign-up" class="btn btn-outline-danger">Sign Up</a>
         <a href="/auth/sign-in" class="btn btn-outline-danger">Sign In</a>
     </div>
@@ -29,7 +28,8 @@
         <div class="d-flex my-4">
             <form action="/search" method="get">
                 <div class="input-group location-search-input-group me-3">
-                    <input class="form-control" type="text" name="name" placeholder="Enter location" required>
+                    <input class="form-control" type="text" name="name" placeholder="Enter location" th:value="${locationName}"
+                           required>
                     <button class="btn btn-outline-secondary btn-sm clear-input-button" type="button"
                             onclick="this.previousElementSibling.value=''">
                         &times;
@@ -40,24 +40,19 @@
         </div>
 
         <div>
+            <h2>Locations:</h2>
             <div class="row">
-                <div th:each="weather : ${weathers}" class="col-12 col-lg-3 col-md-6 mb-4">
-                    <div class="card h-100 position-relative weather-card">
-                        <div class="position-absolute weather-card-delete-form">
-                            <button class="btn-close" aria-label="Delete"></button>
-                        </div>
-                        <img class="card-img-top img-fluid"
-                             src="https://openweathermap.org/img/wn/04n@4x.png"
-                             alt="Weather icon">
+                <div th:each="location : ${locations}" class="col-12 col-lg-3 col-md-6 mb-4">
+                    <div class="card h-100">
                         <div class="card-body d-flex flex-column">
-                            <h1 class="card-text" th:text="${weather.temp().toString()} + '°C'"></h1>
-                            <h3 class="card-title" th:text="${weather.name()}"></h3>
-                            <p class="card-text mb-1">
-                                Feels like <span th:text="${weather.tempFeelsLike().toString()} + '°C'"></span>
-                                <span th:text="${weather.clouds()}"></span>
-                            </p>
-                            <p class="card-text mb-1"> Humidity: <span th:text="${weather.humidity()} + '%'"> </span>
-                            </p>
+                            <h5 class="card-title"><span th:text="${location.name}"></span></h5>
+                            <p class="card-text mb-1">Latitude: <span th:text="${location.latitude}"></span></p>
+                            <p class="card-text mb-1">Longitude: <span th:text="${location.longitude}"></span></p>
+<!--                            <p class="card-text mb-1">Country: US</p>-->
+<!--                            <p class="card-text mb-3">State: California</p>-->
+                            <div class="mt-auto">
+                                <button class="btn btn-primary w-100">Add</button>
+                            </div>
                         </div>
                     </div>
                 </div>
