@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <title>Weather Viewer – Homepage</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body class="d-flex flex-column min-vh-100">
 
 <main class="flex-grow-1">
     <nav class="navbar navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">
-                <img src="images/weather-app.png" alt="" width="30" height="24" class="d-inline-block align-text-top">
+            <a class="navbar-brand" th:href="@{/}">
+                <img th:src="@{/images/weather-app.png}" alt="" width="30" height="24"
+                     class="d-inline-block align-text-top">
                 Weather Tracker
             </a>
             <div th:if="${isUserLoginned}">
@@ -23,8 +24,8 @@
             </div>
             <div th:if="!${isUserLoginned}">
                 <div class="d-flex align-items-center">
-                    <a href="/auth/sign-up" class="btn btn-outline-danger">Sign Up</a>
-                    <a href="/auth/sign-in" class="btn btn-danger">Sign In</a>
+                    <a th:href="@{/auth/sign-up}" class="btn btn-outline-danger">Sign Up</a>
+                    <a th:href="@{/auth/sign-in}" class="btn btn-danger">Sign In</a>
                 </div>
             </div>
         </div>
@@ -32,9 +33,10 @@
 
     <section id="page-content">
         <div class="container mt-4">
-            <form action="/search" method="get" class="d-flex my-4">
+            <form th:action="@{/search}" method="get" class="d-flex my-4">
                 <div class="input-group location-search-input-group-flex-grow-1 me-3" style="flex: 2;">
-                    <input class="form-control" type="text" name="name" th:value="${locationName}" placeholder="Enter location" required>
+                    <input class="form-control" type="text" name="name" th:value="${locationName}"
+                           placeholder="Enter location" required>
                     <button class="btn btn-outline-secondary btn-sm clear-input-button" type="button"
                             onclick="this.previousElementSibling.value=''">
                         &times;
@@ -53,7 +55,7 @@
                                 <p class="card-text mb-1">Latitude: <span th:text="${location.latitude}"></span></p>
                                 <p class="card-text mb-1">Longitude: <span th:text="${location.longitude}"></span></p>
                                 <div class="mt-auto">
-                                    <form action="/locations" method="post">
+                                    <form th:action="@{/locations}" method="post">
                                         <input type="hidden" name="name" th:value="${location.name}">
                                         <input type="hidden" name="latitude" th:value="${location.latitude}">
                                         <input type="hidden" name="longitude" th:value="${location.longitude}">
