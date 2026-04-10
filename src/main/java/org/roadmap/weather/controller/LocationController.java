@@ -4,8 +4,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.dto.LocationDto;
+import org.roadmap.weather.service.LocationService;
 import org.roadmap.weather.service.SessionService;
-import org.roadmap.weather.service.WeatherService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,27 +16,20 @@ import java.util.List;
 
 @Controller
 public class LocationController {
-    private final WeatherService weatherService;
+    private final LocationService locationService;
     private final SessionService sessionService;
 
-    public LocationController(WeatherService weatherService, SessionService sessionService) {
-        this.weatherService = weatherService;
+    public LocationController(LocationService locationService, SessionService sessionService) {
+        this.locationService = locationService;
         this.sessionService = sessionService;
     }
 
     @GetMapping("/search")
     public String findLocations(
             @RequestParam String name,
-            HttpServletRequest request,
-            HttpServletResponse response,
             Model model
     ) {
-        Integer userId = extractUserId(request);
-        if (userId == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return "redirect:/auth/sign-in";
-        }
-        List<LocationDto> locations = weatherService.findByName(name, userId);
+        List<LocationDto> locations = locationService.findByName(name);
         model.addAttribute("locations", locations);
         model.addAttribute("locationName", name);
         return "search-results";
@@ -55,7 +48,7 @@ public class LocationController {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return "redirect:/auth/sign-in";
         }
-        weatherService.addLocation(name, latitude, longitude, userId);
+        locationService.add(name, latitude, longitude, userId);
         return "redirect:/";
     }
 
@@ -71,7 +64,7 @@ public class LocationController {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return "redirect:/auth/sign-in";
         }
-        weatherService.deleteLocation(locationId, userId);
+        locationService.delete(locationId, userId);
         return "redirect:/";
     }
 

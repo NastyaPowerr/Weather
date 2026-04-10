@@ -1,6 +1,5 @@
 package org.roadmap.weather.service;
 
-import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.Weather;
 import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.repository.LocationRepository;
@@ -28,30 +27,6 @@ public class WeatherService {
         this.locationRepository = locationRepository;
     }
 
-    public List<LocationDto> findByName(String locationName, Integer userId) {
-        String url = String.format("https://api.openweathermap.org/geo/1.0/direct?q=%s&limit=%s&appid=%s", locationName, 10, apiKey);
-
-        String json = restTemplate.getForObject(url, String.class);
-        JsonNode root = jsonMapper.readTree(json);
-        List<LocationDto> locations = new ArrayList<>();
-
-        for (JsonNode node : root) {
-            String name = node.path("name").asString();
-            BigDecimal latitude = node.path("lat").asDecimal();
-            BigDecimal longitude = node.path("lon").asDecimal();
-
-            LocationDto location = new LocationDto(
-                    name,
-                    userId,
-                    latitude,
-                    longitude
-            );
-            locations.add(location);
-        }
-
-        return locations;
-    }
-
     public List<Weather> getWeathersForUser(Integer userId) {
         List<Location> locations = locationRepository.getByUserId(userId);
         List<Weather> weathers = new ArrayList<>();
@@ -64,7 +39,6 @@ public class WeatherService {
                     apiKey,
                     "metric"
             );
-            System.out.println(url);
             String json = restTemplate.getForObject(url, String.class);
             JsonNode root = jsonMapper.readTree(json);
 
@@ -85,19 +59,5 @@ public class WeatherService {
             );
         }
         return weathers;
-    }
-
-    public void addLocation(String name, String latitude, String longitude, Integer userId) {
-        locationRepository.save(new Location(
-                name,
-                userId,
-                new BigDecimal(latitude),
-                new BigDecimal(longitude)
-        ));
-    }
-
-    public void deleteLocation(String locationId, Integer userId) {
-        // check if user really owns this location
-        locationRepository.delete(Integer.valueOf(locationId));
     }
 }
