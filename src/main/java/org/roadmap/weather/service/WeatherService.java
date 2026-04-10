@@ -69,6 +69,7 @@ public class WeatherService {
             String clouds = root.path("weather").get(0).path("description").asString();
             weathers.add(
                     new Weather(
+                            location.getId(),
                             name,
                             temp,
                             tempFeelsLike,
@@ -87,5 +88,10 @@ public class WeatherService {
                 new BigDecimal(latitude),
                 new BigDecimal(longitude)
         ));
+    }
+
+    public void deleteLocation(String locationId, Integer userId) {
+        // check if user really owns this location
+        locationRepository.delete(Integer.valueOf(locationId));
     }
 }

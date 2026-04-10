@@ -19,6 +19,11 @@ public class LocationRepository {
             FROM weather.locations
             WHERE user_id = ?
             """;
+    private final static String DELETE_BY_ID = """
+            DELETE
+            FROM weather.locations
+            WHERE id = ?
+            """;
 
     public LocationRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -50,5 +55,9 @@ public class LocationRepository {
                 },
                 userId
         );
+    }
+
+    public void delete(Integer locationId) {
+        jdbcTemplate.update(DELETE_BY_ID, locationId);
     }
 }

@@ -9,6 +9,7 @@ import org.roadmap.weather.service.SessionService;
 import org.roadmap.weather.service.WeatherService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -60,7 +61,22 @@ public class WeatherController {
             return "redirect:/auth/sign-in";
         }
         weatherService.addLocation(name, latitude, longitude, userId);
-        return "redirect:/index";
+        return "redirect:/";
+    }
+
+    @PostMapping("/locations/delete")
+    public String deleteLocation(
+            @RequestParam String locationId,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        Integer userId = extractUserId(request);
+        if (userId == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return "redirect:/auth/sign-in";
+        }
+        weatherService.deleteLocation(locationId, userId);
+        return "redirect:/";
     }
 
     @GetMapping("/")
