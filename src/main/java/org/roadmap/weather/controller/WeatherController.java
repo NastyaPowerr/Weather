@@ -10,6 +10,7 @@ import org.roadmap.weather.service.WeatherService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -43,6 +44,23 @@ public class WeatherController {
         model.addAttribute("locations", locations);
         model.addAttribute("locationName", name);
         return "search-results";
+    }
+
+    @PostMapping("/locations")
+    public String addLocation(
+            @RequestParam String name,
+            @RequestParam String latitude,
+            @RequestParam String longitude,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        Integer userId = extractUserId(request);
+        if (userId == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return "redirect:/auth/sign-in";
+        }
+        weatherService.addLocation(name, latitude, longitude, userId);
+        return "redirect:/index";
     }
 
     @GetMapping("/")

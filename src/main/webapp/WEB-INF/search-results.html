@@ -48,10 +48,13 @@
                             <h5 class="card-title"><span th:text="${location.name}"></span></h5>
                             <p class="card-text mb-1">Latitude: <span th:text="${location.latitude}"></span></p>
                             <p class="card-text mb-1">Longitude: <span th:text="${location.longitude}"></span></p>
-<!--                            <p class="card-text mb-1">Country: US</p>-->
-<!--                            <p class="card-text mb-3">State: California</p>-->
                             <div class="mt-auto">
-                                <button class="btn btn-primary w-100">Add</button>
+                                <form action="/locations" method="post">
+                                    <input type="hidden" name="name" th:value="${location.name}">
+                                    <input type="hidden" name="latitude" th:value="${location.latitude}">
+                                    <input type="hidden" name="longitude" th:value="${location.longitude}">
+                                    <button class="btn btn-primary w-100">Add</button>
+                                </form>
                             </div>
                         </div>
                     </div>

@@ -29,11 +29,6 @@ public class WeatherService {
     }
 
     public List<LocationDto> findByName(String locationName, Integer userId) {
-        // сначала по имени чекаем в БД (чтобы уменьшить кол-во запросов?), если там нет, то делаем запрос
-        // продумать later
-
-        // не забыть про повторяющиеся имена локаций (повторные названия для городов)
-
         String url = String.format("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s", locationName, apiKey);
 
         String json = restTemplate.getForObject(url, String.class);
@@ -42,27 +37,14 @@ public class WeatherService {
         BigDecimal latitude = root.path("coord").path("lat").asDecimal();
         BigDecimal longitude = root.path("coord").path("lon").asDecimal();
 
-        // save in DB
-        Location location = new Location(
-                locationName,
-                userId,
-                latitude,
-                longitude
-        );
-
-        // для сокрытия id локации от юзера:
-        // savedLocation = repository.save()
-        locationRepository.save(location);
-
-        // с помощью маппера из savedLocationEntity в дто
-        LocationDto locationForUser = new LocationDto(
+        LocationDto location = new LocationDto(
                 locationName,
                 userId,
                 latitude,
                 longitude
         );
         List<LocationDto> locations = new ArrayList<>();
-        locations.add(locationForUser);
+        locations.add(location);
         return locations;
     }
 
@@ -96,5 +78,14 @@ public class WeatherService {
             );
         }
         return weathers;
+    }
+
+    public void addLocation(String name, String latitude, String longitude, Integer userId) {
+        locationRepository.save(new Location(
+                name,
+                userId,
+                new BigDecimal(latitude),
+                new BigDecimal(longitude)
+        ));
     }
 }
