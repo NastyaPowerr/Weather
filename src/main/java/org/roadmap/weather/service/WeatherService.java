@@ -29,22 +29,26 @@ public class WeatherService {
     }
 
     public List<LocationDto> findByName(String locationName, Integer userId) {
-        String url = String.format("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s", locationName, apiKey);
+        String url = String.format("https://api.openweathermap.org/geo/1.0/direct?q=%s&limit=%s&appid=%s", locationName, 10, apiKey);
 
         String json = restTemplate.getForObject(url, String.class);
         JsonNode root = jsonMapper.readTree(json);
-
-        BigDecimal latitude = root.path("coord").path("lat").asDecimal();
-        BigDecimal longitude = root.path("coord").path("lon").asDecimal();
-
-        LocationDto location = new LocationDto(
-                locationName,
-                userId,
-                latitude,
-                longitude
-        );
         List<LocationDto> locations = new ArrayList<>();
-        locations.add(location);
+
+        for (JsonNode node : root) {
+            String name = node.path("name").asString();
+            BigDecimal latitude = node.path("lat").asDecimal();
+            BigDecimal longitude = node.path("lon").asDecimal();
+
+            LocationDto location = new LocationDto(
+                    name,
+                    userId,
+                    latitude,
+                    longitude
+            );
+            locations.add(location);
+        }
+
         return locations;
     }
 
@@ -54,11 +58,13 @@ public class WeatherService {
 
         for (Location location : locations) {
             String url = String.format(
-                    "https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s",
-                    location.getLongitude(),
+                    "https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=%s",
                     location.getLatitude(),
-                    apiKey
+                    location.getLongitude(),
+                    apiKey,
+                    "metric"
             );
+            System.out.println(url);
             String json = restTemplate.getForObject(url, String.class);
             JsonNode root = jsonMapper.readTree(json);
 
