@@ -16,6 +16,11 @@ public class AuthRepository {
             FROM weather.users
             WHERE login = ?
             """;
+    private static final String GET_USER_BY_ID = """
+            SELECT login, password
+            FROM weather.users
+            WHERE id = ?
+            """;
 
     public AuthRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -38,6 +43,18 @@ public class AuthRepository {
                     return new User(id, login, password);
                 },
                 login
+        );
+    }
+
+    public User getUserById(Integer userId) {
+        return jdbcTemplate.queryForObject(
+                GET_USER_BY_ID,
+                (rs, rowNum) -> {
+                    String login = rs.getString("login");
+                    String password = rs.getString("password");
+                    return new User(userId, login, password);
+                },
+                userId
         );
     }
 }

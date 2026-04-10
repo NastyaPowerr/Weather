@@ -37,4 +37,9 @@ public class AuthService {
     private static String getEncryptedPassword(String password) {
         return BCrypt.withDefaults().hashToString(12, password.toCharArray());
     }
+
+    public String getLoginById(Integer userId) {
+        User user = authRepository.getUserById(userId);
+        return user.getLogin();
+    }
 }

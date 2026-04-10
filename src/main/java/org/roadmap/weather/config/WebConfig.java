@@ -17,6 +17,7 @@ public class WebConfig implements WebMvcConfigurer {
         SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
         resolver.setPrefix("/WEB-INF/");
         resolver.setSuffix(".html");
+        resolver.setCharacterEncoding("UTF-8");
         return resolver;
     }
 

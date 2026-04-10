@@ -4,6 +4,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.dto.LocationDto;
+import org.roadmap.weather.repository.AuthRepository;
+import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.service.LocationService;
 import org.roadmap.weather.service.SessionService;
 import org.springframework.stereotype.Controller;
@@ -18,17 +20,32 @@ import java.util.List;
 public class LocationController {
     private final LocationService locationService;
     private final SessionService sessionService;
+    private final AuthService authService;
 
-    public LocationController(LocationService locationService, SessionService sessionService) {
+    public LocationController(
+            LocationService locationService,
+            SessionService sessionService,
+            AuthService authService
+    ) {
         this.locationService = locationService;
         this.sessionService = sessionService;
+        this.authService = authService;
     }
 
     @GetMapping("/search")
     public String findLocations(
             @RequestParam String name,
+            HttpServletRequest request,
             Model model
     ) {
+        Integer userId = extractUserId(request);
+        if (userId == null) {
+            model.addAttribute("isUserLoginned", false);
+        } else {
+            String login = authService.getLoginById(userId);
+            model.addAttribute("userLogin", login);
+            model.addAttribute("isUserLoginned", true);
+        }
         List<LocationDto> locations = locationService.findByName(name);
         model.addAttribute("locations", locations);
         model.addAttribute("locationName", name);

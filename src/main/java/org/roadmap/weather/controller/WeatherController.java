@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.dto.Weather;
+import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.service.SessionService;
 import org.roadmap.weather.service.WeatherService;
 import org.springframework.stereotype.Controller;
@@ -16,10 +17,16 @@ import java.util.List;
 public class WeatherController {
     private final WeatherService weatherService;
     private final SessionService sessionService;
+    private final AuthService authService;
 
-    public WeatherController(WeatherService weatherService, SessionService sessionService) {
+    public WeatherController(
+            WeatherService weatherService,
+            SessionService sessionService,
+            AuthService authService
+            ) {
         this.weatherService = weatherService;
         this.sessionService = sessionService;
+        this.authService = authService;
     }
 
     @GetMapping("/")
@@ -32,10 +39,15 @@ public class WeatherController {
         if (userId == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             model.addAttribute("weathers", List.of());
+            model.addAttribute("isUserLoginned", false);
             return "index";
         }
         List<Weather> weathers = weatherService.getWeathersForUser(userId);
+        String login = authService.getLoginById(userId);
+        System.out.println(login);
+        model.addAttribute("userLogin", login);
         model.addAttribute("weathers", weathers);
+        model.addAttribute("isUserLoginned", true);
         return "index";
     }
 
