@@ -16,13 +16,13 @@
                      class="d-inline-block align-text-top">
                 Weather Tracker
             </a>
-            <div th:if="${isUserLoginned}">
+            <div th:if="${isUserAuthorized}">
                 <div class="d-flex align-items-center">
                     <span class="navbar-text me-3" th:text="${userLogin}"></span>
                     <a th:href="@{/auth/logout}" class="btn btn-outline-danger">Sign out</a>
                 </div>
             </div>
-            <div th:if="!${isUserLoginned}">
+            <div th:if="!${isUserAuthorized}">
                 <div class="d-flex align-items-center">
                     <a th:href="@{/auth/sign-up}" class="btn btn-outline-danger">Sign Up</a>
                     <a th:href="@{/auth/sign-in}" class="btn btn-danger">Sign In</a>
@@ -44,7 +44,7 @@
                 <button class="btn btn-outline-success">Search</button>
             </form>
 
-            <div th:if="${isUserLoginned}">
+            <div th:if="${isUserAuthorized}">
                 <div class="row">
                     <div th:each="weather : ${weathers}" class="col-12 col-lg-3 col-md-6 mb-4">
                         <div class="card h-100 position-relative weather-card">
@@ -73,7 +73,7 @@
                 </div>
             </div>
 
-            <div th:if="!${isUserLoginned}">
+            <div th:if="!${isUserAuthorized}">
                 <div class="px-4">
                     <span class="fs-4">To see weathers you need to <a th:href="@{/auth/sign-in}">log in</a> and add location.</span>
                 </div>

@@ -1,6 +1,9 @@
 package org.roadmap.weather.repository;
 
 import org.roadmap.weather.entity.Location;
+import org.roadmap.weather.exception.ExceptionMessages;
+import org.roadmap.weather.exception.location.LocationAlreadyExistsForUserException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -31,13 +34,17 @@ public class LocationRepository {
     }
 
     public void save(Location location) {
-        jdbcTemplate.update(
-                SAVE,
-                location.getName(),
-                location.getUserId(),
-                location.getLatitude(),
-                location.getLongitude()
-        );
+        try {
+            jdbcTemplate.update(
+                    SAVE,
+                    location.getName(),
+                    location.getUserId(),
+                    location.getLatitude(),
+                    location.getLongitude()
+            );
+        } catch (DuplicateKeyException ex) {
+            throw new LocationAlreadyExistsForUserException(ExceptionMessages.LOCATION_CONFLICT_FOR_USER);
+        }
     }
 
     public List<Location> getByUserId(Integer userId) {
@@ -52,7 +59,8 @@ public class LocationRepository {
                             name,
                             userId,
                             latitude,
-                            longitude);
+                            longitude
+                    );
                 },
                 userId
         );

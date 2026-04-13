@@ -2,10 +2,13 @@ package org.roadmap.weather.service;
 
 import org.roadmap.weather.dto.Weather;
 import org.roadmap.weather.entity.Location;
+import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.repository.LocationRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -39,24 +42,28 @@ public class WeatherService {
                     apiKey,
                     "metric"
             );
-            String json = restTemplate.getForObject(url, String.class);
-            JsonNode root = jsonMapper.readTree(json);
+            try {
+                String json = restTemplate.getForObject(url, String.class);
+                JsonNode root = jsonMapper.readTree(json);
 
-            String name = location.getName();
-            BigDecimal temp = root.path("main").path("temp").asDecimal();
-            BigDecimal tempFeelsLike = root.path("main").path("feels_like").asDecimal();
-            BigDecimal humidity = root.path("main").path("humidity").asDecimal();
-            String clouds = root.path("weather").get(0).path("description").asString();
-            weathers.add(
-                    new Weather(
-                            location.getId(),
-                            name,
-                            temp,
-                            tempFeelsLike,
-                            humidity,
-                            clouds
-                    )
-            );
+                String name = location.getName();
+                BigDecimal temp = root.path("main").path("temp").asDecimal();
+                BigDecimal tempFeelsLike = root.path("main").path("feels_like").asDecimal();
+                BigDecimal humidity = root.path("main").path("humidity").asDecimal();
+                String clouds = root.path("weather").get(0).path("description").asString();
+                weathers.add(
+                        new Weather(
+                                location.getId(),
+                                name,
+                                temp,
+                                tempFeelsLike,
+                                humidity,
+                                clouds
+                        )
+                );
+            } catch (HttpClientErrorException | HttpServerErrorException ex) {
+                throw new GeocodingApiCallException(ex.getMessage());
+            }
         }
         return weathers;
     }

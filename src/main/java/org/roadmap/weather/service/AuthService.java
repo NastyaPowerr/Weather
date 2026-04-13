@@ -4,7 +4,10 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.entity.User;
+import org.roadmap.weather.exception.ExceptionMessages;
+import org.roadmap.weather.exception.user.InvalidUserParamsException;
 import org.roadmap.weather.repository.AuthRepository;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -25,21 +28,30 @@ public class AuthService {
         authRepository.save(userToSave);
     }
 
-    public Optional<SessionDto> authorize(UserDto user) {
-        User foundUser = authRepository.getUser(user.login());
-        BCrypt.Result result = BCrypt.verifyer().verify(user.password().toCharArray(), foundUser.getPassword());
-        if (result.verified) {
-            return Optional.of(sessionService.create(foundUser.getId()));
+    // wrong OR non-existent login = "invalid login or password"
+    // don't want to give info about whether user registered there or not
+    public SessionDto authorize(UserDto user) {
+        try {
+            User foundUser = authRepository.getUser(user.login());
+            BCrypt.Result result = BCrypt.verifyer().verify(user.password().toCharArray(), foundUser.getPassword());
+            if (!result.verified) {
+                throw new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS);
+            }
+            return sessionService.create(foundUser.getId());
+        } catch (EmptyResultDataAccessException ex) {
+            throw new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS);
         }
-        return Optional.empty();
     }
 
     private static String getEncryptedPassword(String password) {
         return BCrypt.withDefaults().hashToString(12, password.toCharArray());
     }
 
-    public String getLoginById(Integer userId) {
+    public Optional<String> getLoginById(Integer userId) {
         User user = authRepository.getUserById(userId);
-        return user.getLogin();
+        if (user != null) {
+            return Optional.of(user.getLogin());
+        }
+        return Optional.empty();
     }
 }

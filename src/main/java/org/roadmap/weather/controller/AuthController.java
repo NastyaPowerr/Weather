@@ -5,14 +5,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.dto.request.UserRegistrationRequest;
+import org.roadmap.weather.exception.ExceptionMessages;
+import org.roadmap.weather.exception.user.InvalidUserParamsException;
+import org.roadmap.weather.exception.user.UserAlreadyExistsException;
 import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.util.CookieManagerUtil;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/auth")
@@ -29,12 +31,24 @@ public class AuthController {
     }
 
     @PostMapping("/sign-up")
-    public String register(UserRegistrationRequest user) {
+    public String register(
+            UserRegistrationRequest user,
+            HttpServletResponse response,
+            Model model
+    ) {
         if (!user.password().equals(user.repeatedPassword())) {
+            model.addAttribute("error", ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return "sign-up";
         }
         UserDto userToRegister = new UserDto(user.username(), user.password());
-        authService.register(userToRegister);
+        try {
+            authService.register(userToRegister);
+        } catch (UserAlreadyExistsException ex) {
+            model.addAttribute("error", ExceptionMessages.USERNAME_TAKEN);
+            response.setStatus(HttpServletResponse.SC_CONFLICT);
+            return "sign-up";
+        }
         return "redirect:/";
     }
 
@@ -44,17 +58,22 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
-    public String login(UserDto user, HttpServletResponse response) {
-        Optional<SessionDto> session = authService.authorize(user);
-        if (session.isPresent()) {
-            String sessionId = String.valueOf(session.get().id());
+    public String login(
+            UserDto user,
+            HttpServletResponse response,
+            Model model
+    ) {
+        try {
+            SessionDto session = authService.authorize(user);
+            String sessionId = String.valueOf(session.id());
             Cookie cookie = CookieManagerUtil.createCookie(sessionId);
             response.addCookie(cookie);
             response.setStatus(HttpServletResponse.SC_OK);
             return "redirect:/";
-        } else {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (InvalidUserParamsException ex) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            model.addAttribute("error", ex.getMessage());
+            return "sign-in";
         }
-        return "sign-in";
     }
 }

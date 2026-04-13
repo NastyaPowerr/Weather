@@ -2,10 +2,16 @@ package org.roadmap.weather.service;
 
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.entity.Location;
+import org.roadmap.weather.exception.ExceptionMessages;
+import org.roadmap.weather.exception.ValidationException;
+import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.repository.LocationRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -38,29 +44,41 @@ public class LocationService {
 
     public List<LocationDto> findByName(String locationName) {
         String url = String.format("https://api.openweathermap.org/geo/1.0/direct?q=%s&limit=%s&appid=%s", locationName, 10, apiKey);
+        try {
+            String json = restTemplate.getForObject(url, String.class);
+            JsonNode root = jsonMapper.readTree(json);
+            List<LocationDto> locations = new ArrayList<>();
 
-        String json = restTemplate.getForObject(url, String.class);
-        JsonNode root = jsonMapper.readTree(json);
-        List<LocationDto> locations = new ArrayList<>();
+            for (JsonNode node : root) {
+                String name = node.path("name").asString();
+                BigDecimal latitude = node.path("lat").asDecimal();
+                BigDecimal longitude = node.path("lon").asDecimal();
 
-        for (JsonNode node : root) {
-            String name = node.path("name").asString();
-            BigDecimal latitude = node.path("lat").asDecimal();
-            BigDecimal longitude = node.path("lon").asDecimal();
-
-            LocationDto location = new LocationDto(
-                    name,
-                    latitude,
-                    longitude
-            );
-            locations.add(location);
+                LocationDto location = new LocationDto(
+                        name,
+                        latitude,
+                        longitude
+                );
+                locations.add(location);
+            }
+            return locations;
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw new GeocodingApiCallException(ex.getMessage());
         }
-
-        return locations;
     }
 
+    @Transactional
     public void delete(String locationId, Integer userId) {
-        // check if user really owns this location
-        locationRepository.delete(Integer.valueOf(locationId));
+        try {
+            Integer id = Integer.valueOf(locationId);
+            List<Location> locations = locationRepository.getByUserId(userId);
+            for (Location location : locations) {
+                if (location.getId().equals(id)) {
+                    locationRepository.delete(id);
+                }
+            }
+        } catch (NumberFormatException ex) {
+            throw new ValidationException(ExceptionMessages.LOCATION_NOT_FOUND_FOR_USER);
+        }
     }
 }
