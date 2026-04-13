@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class AuthRepository {
-    private final JdbcTemplate jdbcTemplate;
     private static final String SAVE = """
             INSERT INTO weather.users(login, password)
             VALUES (?, ?)
@@ -21,6 +20,8 @@ public class AuthRepository {
             FROM weather.users
             WHERE id = ?
             """;
+
+    private final JdbcTemplate jdbcTemplate;
 
     public AuthRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;

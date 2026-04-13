@@ -31,7 +31,6 @@ public class AuthController {
     @PostMapping("/sign-up")
     public String register(UserRegistrationRequest user) {
         if (!user.password().equals(user.repeatedPassword())) {
-            // add error for page
             return "sign-up";
         }
         UserDto userToRegister = new UserDto(user.username(), user.password());
@@ -54,7 +53,6 @@ public class AuthController {
             response.setStatus(HttpServletResponse.SC_OK);
             return "redirect:/";
         } else {
-            // add error
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
         return "sign-in";

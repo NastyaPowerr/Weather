@@ -1,7 +1,6 @@
 package org.roadmap.weather.repository;
 
 import org.roadmap.weather.entity.Session;
-import org.roadmap.weather.entity.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -10,7 +9,6 @@ import java.util.UUID;
 
 @Repository
 public class SessionRepository {
-    private final JdbcTemplate jdbcTemplate;
     private final static String SAVE = """
             INSERT INTO weather.sessions(id, user_id, expires_at)
             VALUES (?, ?, ?)
@@ -20,6 +18,7 @@ public class SessionRepository {
             FROM weather.sessions
             WHERE id = ?
             """;
+    private final JdbcTemplate jdbcTemplate;
 
     public SessionRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;

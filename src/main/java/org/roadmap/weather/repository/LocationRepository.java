@@ -9,7 +9,6 @@ import java.util.List;
 
 @Repository
 public class LocationRepository {
-    private final JdbcTemplate jdbcTemplate;
     private static final String SAVE = """
             INSERT INTO weather.locations(name, user_id, latitude, longitude)
             VALUES (?, ?, ?, ?)
@@ -24,6 +23,8 @@ public class LocationRepository {
             FROM weather.locations
             WHERE id = ?
             """;
+
+    private final JdbcTemplate jdbcTemplate;
 
     public LocationRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;

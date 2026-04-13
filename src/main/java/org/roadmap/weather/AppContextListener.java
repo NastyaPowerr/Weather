@@ -10,7 +10,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 @WebListener
 public class AppContextListener implements ServletContextListener {
-
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
