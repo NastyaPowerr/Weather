@@ -6,6 +6,7 @@ import org.roadmap.weather.repository.SessionRepository;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -46,6 +47,10 @@ public class SessionService {
     public Integer getUserIdFromSession(String sessionId) {
         Session session = sessionRepository.getById(sessionId);
         return session.getUserId();
+    }
+
+    public void deleteExpiredSessions() {
+        sessionRepository.deleteExpiredSessions();
     }
 
     private boolean isExpired(Session session) {
