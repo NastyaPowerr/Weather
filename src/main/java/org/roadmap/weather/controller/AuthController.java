@@ -12,9 +12,13 @@ import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.util.CookieManagerUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
 
 @Controller
 @RequestMapping("/auth")
@@ -32,10 +36,17 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public String register(
-            UserRegistrationRequest user,
+            @Valid @ModelAttribute UserRegistrationRequest user,
+            BindingResult res,
             HttpServletResponse response,
             Model model
     ) {
+        if (res.hasErrors()) {
+            String error = res.getAllErrors().get(0).getDefaultMessage();
+            model.addAttribute("error", error);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return "sign-up";
+        }
         if (!user.password().equals(user.repeatedPassword())) {
             model.addAttribute("error", ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

@@ -1,6 +1,9 @@
 package org.roadmap.weather.exception;
 
-public class ExceptionMessages {
+public final class ExceptionMessages {
+    private ExceptionMessages() {
+    }
+
     public static final String PASSWORDS_DO_NOT_MATCH = "The passwords don't match.";
     public static final String USERNAME_TAKEN = "User with that login already exists.";
 
