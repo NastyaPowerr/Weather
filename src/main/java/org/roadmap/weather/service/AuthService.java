@@ -11,6 +11,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -53,5 +54,9 @@ public class AuthService {
             return Optional.of(user.getLogin());
         }
         return Optional.empty();
+    }
+
+    public void logout(String sessionId) {
+        sessionService.deleteSession(sessionId);
     }
 }

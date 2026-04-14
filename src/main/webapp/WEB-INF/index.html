@@ -19,7 +19,9 @@
             <div th:if="${isUserAuthorized}">
                 <div class="d-flex align-items-center">
                     <span class="navbar-text me-3" th:text="${userLogin}"></span>
-                    <a th:href="@{/auth/logout}" class="btn btn-outline-danger">Sign out</a>
+                    <form th:action="@{/auth/sign-out}" method="post">
+                        <button type="submit" class="btn btn-outline-danger">Sign out</button>
+                    </form>
                 </div>
             </div>
             <div th:if="!${isUserAuthorized}">

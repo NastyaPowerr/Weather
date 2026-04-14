@@ -23,6 +23,11 @@ public class SessionRepository {
             FROM weather.sessions
             WHERE expires_at < NOW()
             """;
+    private final static String DELETE = """
+            DELETE
+            FROM weather.sessions
+            WHERE id = ?
+            """;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -54,5 +59,9 @@ public class SessionRepository {
 
     public void deleteExpiredSessions() {
         jdbcTemplate.update(DELETE_EXPIRED);
+    }
+
+    public void delete(String sessionId) {
+        jdbcTemplate.update(DELETE, sessionId);
     }
 }

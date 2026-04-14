@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class SessionInterceptor implements HandlerInterceptor {
@@ -28,7 +29,7 @@ public class SessionInterceptor implements HandlerInterceptor {
             if (sessionService.isSessionValid(sessionId.get())) {
                 Integer userId = sessionService.getUserIdFromSession(sessionId.get());
                 request.setAttribute("userId", userId);
-                request.setAttribute("sessionId", sessionId);
+                request.setAttribute("sessionId", sessionId.get());
             }
         }
         return true;

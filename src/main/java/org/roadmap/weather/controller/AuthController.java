@@ -17,7 +17,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/auth")
@@ -85,5 +88,17 @@ public class AuthController {
             model.addAttribute("error", ex.getMessage());
             return "sign-in";
         }
+    }
+
+    @PostMapping("/sign-out")
+    public String logout(
+            @RequestAttribute(name = "sessionId", required = false) String sessionId,
+            HttpServletResponse response
+    ) {
+        if (sessionId != null) {
+            authService.logout(sessionId);
+        }
+        response.addCookie(CookieManagerUtil.deleteCookie());
+        return "redirect:/";
     }
 }

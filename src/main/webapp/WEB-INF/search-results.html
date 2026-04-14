@@ -19,7 +19,7 @@
             <div th:if="${isUserAuthorized}">
                 <div class="d-flex align-items-center">
                     <span class="navbar-text me-3" th:text="${userLogin}"></span>
-                    <a href="/auth/logout" class="btn btn-outline-danger">Sign out</a>
+                    <a th:href="@{/auth/sign-out}" class="btn btn-outline-danger">Sign out</a>
                 </div>
             </div>
             <div th:if="!${isUserAuthorized}">

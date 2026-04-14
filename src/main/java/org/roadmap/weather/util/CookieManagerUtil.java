@@ -15,4 +15,14 @@ public final class CookieManagerUtil {
         cookie.setMaxAge(2 * 60 * 60);
         return cookie;
     }
+
+    // delete = give cookie with age = 0
+    public static Cookie deleteCookie() {
+        Cookie cookie = new Cookie("sessionId", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        return cookie;
+    }
 }
