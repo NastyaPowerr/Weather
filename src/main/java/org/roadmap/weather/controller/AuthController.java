@@ -2,6 +2,7 @@ package org.roadmap.weather.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.dto.request.UserRegistrationRequest;
@@ -12,13 +13,11 @@ import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.util.CookieManagerUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 
 @Controller
 @RequestMapping("/auth")

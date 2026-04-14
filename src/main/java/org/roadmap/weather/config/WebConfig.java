@@ -1,10 +1,12 @@
 package org.roadmap.weather.config;
 
+import org.roadmap.weather.SessionInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
@@ -14,6 +16,12 @@ import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 @EnableWebMvc
 @EnableScheduling
 public class WebConfig implements WebMvcConfigurer {
+    private final SessionInterceptor sessionInterceptor;
+
+    public WebConfig(SessionInterceptor sessionInterceptor) {
+        this.sessionInterceptor = sessionInterceptor;
+    }
+
     @Bean
     public SpringResourceTemplateResolver templateResolver() {
         SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
@@ -40,5 +48,19 @@ public class WebConfig implements WebMvcConfigurer {
         SpringTemplateEngine engine = new SpringTemplateEngine();
         engine.setTemplateResolver(templateResolver());
         return engine;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(sessionInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns(
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/error",
+                        "/auth/sign-in",
+                        "/auth/sign-up"
+                );
     }
 }

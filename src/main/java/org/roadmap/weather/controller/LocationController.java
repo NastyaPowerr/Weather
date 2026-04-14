@@ -1,6 +1,5 @@
 package org.roadmap.weather.controller;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.dto.LocationDto;
@@ -11,11 +10,11 @@ import org.roadmap.weather.exception.location.LocationAlreadyExistsForUserExcept
 import org.roadmap.weather.exception.user.UserNotFoundException;
 import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.service.LocationService;
-import org.roadmap.weather.service.SessionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -25,31 +24,27 @@ import java.util.Optional;
 @Controller
 public class LocationController {
     private final LocationService locationService;
-    private final SessionService sessionService;
     private final AuthService authService;
 
     public LocationController(
             LocationService locationService,
-            SessionService sessionService,
             AuthService authService
     ) {
         this.locationService = locationService;
-        this.sessionService = sessionService;
         this.authService = authService;
     }
 
     @GetMapping("/search")
     public String findLocations(
             @RequestParam String name,
-            HttpServletRequest request,
+            @RequestAttribute(name = "userId", required = false) Integer userId,
             HttpServletResponse response,
             Model model
     ) {
-        Optional<Integer> userId = extractUserId(request);
-        if (userId.isEmpty()) {
+        if (userId == null) {
             model.addAttribute("isUserAuthorized", false);
         } else {
-            Optional<String> login = authService.getLoginById(userId.get());
+            Optional<String> login = authService.getLoginById(userId);
             if (login.isEmpty()) {
                 throw new UserNotFoundException(ExceptionMessages.USER_NOT_FOUND);
             }
@@ -72,19 +67,18 @@ public class LocationController {
             @RequestParam String name,
             @RequestParam String latitude,
             @RequestParam String longitude,
-            HttpServletRequest request,
+            @RequestAttribute(name = "userId", required = false) Integer userId,
             HttpServletResponse response,
             Model model,
             RedirectAttributes redirectAttributes
     ) {
         try {
-            Optional<Integer> userId = extractUserId(request);
-            if (userId.isEmpty()) {
+            if (userId == null) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 model.addAttribute("error", ExceptionMessages.REQUIRE_AUTHORIZATION);
                 return "redirect:/auth/sign-in";
             }
-            locationService.add(name, latitude, longitude, userId.get());
+            locationService.add(name, latitude, longitude, userId);
             return "redirect:/";
         } catch (LocationAlreadyExistsForUserException ex) {
             redirectAttributes.addFlashAttribute("error", ExceptionMessages.USER_ALREADY_HAS_LOCATION);
@@ -95,36 +89,19 @@ public class LocationController {
     @PostMapping("/locations/delete")
     public String deleteLocation(
             @RequestParam String locationId,
-            HttpServletRequest request,
+            @RequestAttribute(name = "userId", required = false) Integer userId,
             HttpServletResponse response
     ) {
         try {
-            Optional<Integer> userId = extractUserId(request);
-
-            if (userId.isEmpty()) {
+            if (userId == null) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return "redirect:/auth/sign-in";
             }
-            locationService.delete(locationId, userId.get());
+            locationService.delete(locationId, userId);
             return "redirect:/";
         } catch (ValidationException ex) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return "redirect:/";
         }
-    }
-
-    private Optional<Integer> extractUserId(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            return Optional.empty();
-        }
-        for (Cookie cookie : cookies) {
-            if ("sessionId".equals(cookie.getName())) {
-                if (sessionService.isSessionValid(cookie.getValue())) {
-                    return Optional.ofNullable(sessionService.getUserIdFromSession(cookie.getValue()));
-                }
-            }
-        }
-        return Optional.empty();
     }
 }
