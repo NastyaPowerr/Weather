@@ -7,11 +7,9 @@ import org.roadmap.weather.entity.User;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.user.InvalidUserParamsException;
 import org.roadmap.weather.repository.AuthRepository;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -31,17 +29,16 @@ public class AuthService {
 
     // wrong OR non-existent login = "invalid login or password"
     // don't want to give info about whether user registered there or not
-    public SessionDto authorize(UserDto user) {
-        try {
-            User foundUser = authRepository.getUser(user.login());
-            BCrypt.Result result = BCrypt.verifyer().verify(user.password().toCharArray(), foundUser.getPassword());
-            if (!result.verified) {
-                throw new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS);
-            }
-            return sessionService.create(foundUser.getId());
-        } catch (EmptyResultDataAccessException ex) {
+    public SessionDto authorize(UserDto userDto) {
+        User user = authRepository.findByLogin(userDto.login())
+                .orElseThrow(() -> new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS));
+
+        BCrypt.Result result = BCrypt.verifyer().verify(userDto.password().toCharArray(), user.getPassword());
+        if (!result.verified) {
             throw new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS);
         }
+        return sessionService.create(user.getId());
+
     }
 
     private static String getEncryptedPassword(String password) {
@@ -49,9 +46,9 @@ public class AuthService {
     }
 
     public Optional<String> getLoginById(Integer userId) {
-        User user = authRepository.getUserById(userId);
-        if (user != null) {
-            return Optional.of(user.getLogin());
+        Optional<User> user = authRepository.findById(userId);
+        if (user.isPresent()) {
+            return Optional.of(user.get().getLogin());
         }
         return Optional.empty();
     }

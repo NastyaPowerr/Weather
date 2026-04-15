@@ -31,7 +31,7 @@ public class WeatherService {
     }
 
     public List<Weather> getWeathersForUser(Integer userId) {
-        List<Location> locations = locationRepository.getByUserId(userId);
+        List<Location> locations = locationRepository.findByUserId(userId);
         List<Weather> weathers = new ArrayList<>();
 
         for (Location location : locations) {

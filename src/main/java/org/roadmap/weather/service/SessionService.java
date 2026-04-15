@@ -6,6 +6,7 @@ import org.roadmap.weather.repository.SessionRepository;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -34,18 +35,18 @@ public class SessionService {
 
     public boolean isSessionValid(String sessionId) {
         // valid = exists in DB and not expired
-        Session session = sessionRepository.getById(sessionId);
-        if (session != null) {
-            if (!isExpired(session)) {
+        Optional<Session> session = sessionRepository.findById(sessionId);
+        if (session.isPresent()) {
+            if (!isExpired(session.get())) {
                 return true;
             }
         }
         return false;
     }
 
-    public Integer getUserIdFromSession(String sessionId) {
-        Session session = sessionRepository.getById(sessionId);
-        return session.getUserId();
+    public Optional<Integer> getUserIdFromSession(String sessionId) {
+        Optional<Session> session = sessionRepository.findById(sessionId);
+        return session.map(Session::getUserId);
     }
 
     public void deleteExpiredSessions() {
@@ -53,7 +54,7 @@ public class SessionService {
     }
 
     public void deleteSession(String sessionId) {
-        sessionRepository.delete(sessionId);
+        sessionRepository.deleteById(sessionId);
     }
 
     private boolean isExpired(Session session) {

@@ -71,10 +71,10 @@ public class LocationService {
     public void delete(String locationId, Integer userId) {
         try {
             Integer id = Integer.valueOf(locationId);
-            List<Location> locations = locationRepository.getByUserId(userId);
+            List<Location> locations = locationRepository.findByUserId(userId);
             for (Location location : locations) {
                 if (location.getId().equals(id)) {
-                    locationRepository.delete(id);
+                    locationRepository.deleteById(id);
                 }
             }
         } catch (NumberFormatException ex) {
