@@ -14,17 +14,17 @@ import java.util.Optional;
 @Repository
 public class AuthRepositoryImpl implements AuthRepository {
     private static final String SAVE = """
-            INSERT INTO weather.users(login, password)
+            INSERT INTO users(login, password)
             VALUES (?, ?)
             """;
     private static final String GET_USER = """
             SELECT id, login, password
-            FROM weather.users
+            FROM users
             WHERE login = ?
             """;
     private static final String GET_USER_BY_ID = """
             SELECT login, password
-            FROM weather.users
+            FROM users
             WHERE id = ?
             """;
 

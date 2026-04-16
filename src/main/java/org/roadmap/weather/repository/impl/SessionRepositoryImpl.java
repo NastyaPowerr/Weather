@@ -12,22 +12,22 @@ import java.util.UUID;
 @Repository
 public class SessionRepositoryImpl implements SessionRepository {
     private final static String SAVE = """
-            INSERT INTO weather.sessions(id, user_id, expires_at)
+            INSERT INTO sessions(id, user_id, expires_at)
             VALUES (?, ?, ?)
             """;
     private final static String GET_BY_ID = """
             SELECT id, user_id, expires_at
-            FROM weather.sessions
+            FROM sessions
             WHERE id = ?
             """;
     private final static String DELETE_EXPIRED = """
             DELETE
-            FROM weather.sessions
+            FROM sessions
             WHERE expires_at < NOW()
             """;
     private final static String DELETE = """
             DELETE
-            FROM weather.sessions
+            FROM sessions
             WHERE id = ?
             """;
 

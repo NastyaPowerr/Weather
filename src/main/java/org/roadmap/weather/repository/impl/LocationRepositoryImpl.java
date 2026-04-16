@@ -14,17 +14,17 @@ import java.util.List;
 @Repository
 public class LocationRepositoryImpl implements LocationRepository {
     private static final String SAVE = """
-            INSERT INTO weather.locations(name, user_id, latitude, longitude)
+            INSERT INTO locations(name, user_id, latitude, longitude)
             VALUES (?, ?, ?, ?)
             """;
     private final static String GET_BY_USER_ID = """
             SELECT id, name, user_id, latitude, longitude
-            FROM weather.locations
+            FROM locations
             WHERE user_id = ?
             """;
     private final static String DELETE_BY_ID = """
             DELETE
-            FROM weather.locations
+            FROM locations
             WHERE id = ?
             """;
 
