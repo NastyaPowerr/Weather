@@ -1,6 +1,5 @@
-package org.roadmap.weather.config;
+package org.roadmap.weather;
 
-import org.roadmap.weather.SessionInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
