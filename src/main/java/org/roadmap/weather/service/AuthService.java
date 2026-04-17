@@ -5,6 +5,7 @@ import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.entity.User;
 import org.roadmap.weather.exception.ExceptionMessages;
+import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.exception.user.InvalidUserParamsException;
 import org.roadmap.weather.repository.AuthRepository;
 import org.springframework.stereotype.Service;
@@ -22,9 +23,16 @@ public class AuthService {
     }
 
     public void register(UserDto user) {
+        if (user.password() == null) {
+            throw new ValidationException("Password cannot be null");
+        }
         String hashPassword = getEncryptedPassword(user.password());
         User userToSave = new User(user.login(), hashPassword);
-        authRepository.save(userToSave);
+        try {
+            authRepository.save(userToSave);
+        } catch (InvalidUserParamsException ex) {
+            throw new ValidationException(ex.getMessage());
+        }
     }
 
     // wrong OR non-existent login = "invalid login or password"
@@ -32,7 +40,6 @@ public class AuthService {
     public SessionDto authorize(UserDto userDto) {
         User user = authRepository.findByLogin(userDto.login())
                 .orElseThrow(() -> new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS));
-
         if (isPasswordVerified(userDto.password().toCharArray(), user.getPassword())) {
             return sessionService.create(user.getId());
         }

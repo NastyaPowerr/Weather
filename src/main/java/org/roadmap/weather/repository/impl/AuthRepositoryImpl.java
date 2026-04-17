@@ -2,8 +2,10 @@ package org.roadmap.weather.repository.impl;
 
 import org.roadmap.weather.entity.User;
 import org.roadmap.weather.exception.ExceptionMessages;
+import org.roadmap.weather.exception.user.InvalidUserParamsException;
 import org.roadmap.weather.exception.user.UserAlreadyExistsException;
 import org.roadmap.weather.repository.AuthRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,6 +46,8 @@ public class AuthRepositoryImpl implements AuthRepository {
             );
         } catch (DuplicateKeyException ex) {
             throw new UserAlreadyExistsException(ExceptionMessages.USERNAME_TAKEN);
+        } catch (DataIntegrityViolationException ex) {
+            throw new InvalidUserParamsException(ExceptionMessages.USER_PARAMS_ARE_NULL);
         }
     }
 

@@ -29,4 +29,15 @@ public class TestConfig {
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
+
+    @Bean(initMethod = "migrate")
+    public Flyway flyway(DataSource dataSource) {
+        return Flyway.configure()
+                .dataSource(dataSource)
+                .locations("db/migration")
+                .schemas("weather_test")
+                .defaultSchema("weather_test")
+                .baselineOnMigrate(true)
+                .load();
+    }
 }

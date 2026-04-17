@@ -28,6 +28,7 @@
         <glassfish-jakarta-el.version>5.0.0-M1</glassfish-jakarta-el.version>
         <junit-jupiter-engine.version>6.0.3</junit-jupiter-engine.version>
         <mockito-core.version>5.21.0</mockito-core.version>
+        <mockity-junit-jupiter.version>5.21.0</mockity-junit-jupiter.version>
 
         <spring-webmvc.version>7.0.6</spring-webmvc.version>
         <spring-jdbc.version>7.0.6</spring-jdbc.version>
@@ -135,6 +136,12 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${mockito-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockity-junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
