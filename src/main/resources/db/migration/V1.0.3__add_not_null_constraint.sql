@@ -1,0 +1,9 @@
+ALTER TABLE IF EXISTS users
+    ALTER COLUMN login SET not null;
+
+ALTER TABLE IF EXISTS locations
+    ALTER COLUMN user_id SET NOT NULL;
+
+ALTER TABLE IF EXISTS sessions
+    ALTER COLUMN user_id SET NOT NULL,
+    ALTER COLUMN expires_at SET NOT NULL;
