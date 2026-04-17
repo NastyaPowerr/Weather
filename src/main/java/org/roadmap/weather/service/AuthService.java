@@ -33,16 +33,10 @@ public class AuthService {
         User user = authRepository.findByLogin(userDto.login())
                 .orElseThrow(() -> new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS));
 
-        BCrypt.Result result = BCrypt.verifyer().verify(userDto.password().toCharArray(), user.getPassword());
-        if (!result.verified) {
-            throw new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS);
+        if (isPasswordVerified(userDto.password().toCharArray(), user.getPassword())) {
+            return sessionService.create(user.getId());
         }
-        return sessionService.create(user.getId());
-
-    }
-
-    private static String getEncryptedPassword(String password) {
-        return BCrypt.withDefaults().hashToString(12, password.toCharArray());
+        throw new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS);
     }
 
     public Optional<String> getLoginById(Integer userId) {
@@ -55,5 +49,13 @@ public class AuthService {
 
     public void logout(String sessionId) {
         sessionService.deleteSession(sessionId);
+    }
+
+    private String getEncryptedPassword(String password) {
+        return BCrypt.withDefaults().hashToString(12, password.toCharArray());
+    }
+
+    private boolean isPasswordVerified(char[] password, String hashedPassword) {
+        return BCrypt.verifyer().verify(password, hashedPassword).verified;
     }
 }
