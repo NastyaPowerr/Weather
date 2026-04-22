@@ -3,6 +3,8 @@ package org.roadmap.weather.service;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.entity.Session;
 import org.roadmap.weather.repository.SessionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -11,6 +13,7 @@ import java.util.UUID;
 
 @Service
 public class SessionService {
+    private static final Logger logger = LoggerFactory.getLogger(SessionService.class);
     private final SessionRepository sessionRepository;
 
     public SessionService(SessionRepository sessionRepository) {
@@ -24,8 +27,9 @@ public class SessionService {
         Timestamp expiredAt = new Timestamp(System.currentTimeMillis() + twoHoursInMillis);
 
         Session session = new Session(sessionId, userId, expiredAt);
-        sessionRepository.save(session);
 
+        sessionRepository.save(session);
+        logger.info("user={} have new session={} that expires={}", userId, sessionId, expiredAt);
         return new SessionDto(
                 sessionId,
                 userId,

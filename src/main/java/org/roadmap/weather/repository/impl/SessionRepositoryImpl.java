@@ -2,6 +2,8 @@ package org.roadmap.weather.repository.impl;
 
 import org.roadmap.weather.entity.Session;
 import org.roadmap.weather.repository.SessionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +13,7 @@ import java.util.UUID;
 
 @Repository
 public class SessionRepositoryImpl implements SessionRepository {
+    private final static Logger logger = LoggerFactory.getLogger(SessionRepositoryImpl.class);
     private final static String SAVE = """
             INSERT INTO sessions(id, user_id, expires_at)
             VALUES (?, ?, ?)
@@ -69,6 +72,9 @@ public class SessionRepositoryImpl implements SessionRepository {
 
     @Override
     public void deleteExpiredSessions() {
-        jdbcTemplate.update(DELETE_EXPIRED);
+        long start = System.currentTimeMillis();
+        int rows = jdbcTemplate.update(DELETE_EXPIRED);
+        long difference = System.currentTimeMillis() - start;
+        logger.info("Deleted {} expired sessions in {}ms", rows, difference);
     }
 }

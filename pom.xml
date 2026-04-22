@@ -29,6 +29,8 @@
         <junit-jupiter-engine.version>6.0.3</junit-jupiter-engine.version>
         <mockito-core.version>5.21.0</mockito-core.version>
         <mockity-junit-jupiter.version>5.21.0</mockity-junit-jupiter.version>
+        <slf4j.version>2.0.17</slf4j.version>
+        <logback-classic.version>1.5.32</logback-classic.version>
 
         <spring-webmvc.version>7.0.6</spring-webmvc.version>
         <spring-jdbc.version>7.0.6</spring-jdbc.version>
@@ -143,6 +145,18 @@
             <artifactId>mockito-junit-jupiter</artifactId>
             <version>${mockity-junit-jupiter.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback-classic.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

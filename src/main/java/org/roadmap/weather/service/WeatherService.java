@@ -4,6 +4,8 @@ import org.roadmap.weather.dto.Weather;
 import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.repository.LocationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -20,20 +22,26 @@ import java.util.List;
 @Service
 @PropertySource("classpath:application.properties")
 public class WeatherService {
-    @Value("${weather.api.key}")
-    private String apiKey;
+    private final static Logger logger = LoggerFactory.getLogger(WeatherService.class);
+
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper jsonMapper = new ObjectMapper();
     private final LocationRepository locationRepository;
+
+    @Value("${weather.api.key}")
+    private String apiKey;
 
     public WeatherService(LocationRepository locationRepository) {
         this.locationRepository = locationRepository;
     }
 
+    //  org.springframework.web.client.ResourceAccessException: I/O error on GET request for "https://api.openweathermap.org/data/2.5/weather": Connection timed out: connect
     public List<Weather> getWeathersForUser(Integer userId) {
         List<Location> locations = locationRepository.findByUserId(userId);
         List<Weather> weathers = new ArrayList<>();
 
+        long start = System.currentTimeMillis();
+        logger.info("Starting: external API call - searching weather for locations...");
         for (Location location : locations) {
             String url = String.format(
                     "https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=%s",
@@ -62,9 +70,14 @@ public class WeatherService {
                         )
                 );
             } catch (HttpClientErrorException | HttpServerErrorException ex) {
+                logger.info("External API call 'searching weather for locations' was not finished. Error {}", ex.getStatusCode());
                 throw new GeocodingApiCallException(ex.getMessage());
+            } catch (Exception ex) {
+                logger.info("External API call 'searching weather for locations' was not finished. Error {}", ex.getStackTrace());
             }
         }
+        long difference = System.currentTimeMillis() - start;
+        logger.info("Finished:API call - searching weather for locations. Found {} in {}ms", weathers.size(), difference);
         return weathers;
     }
 }

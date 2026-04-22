@@ -5,6 +5,8 @@ import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.user.InvalidUserParamsException;
 import org.roadmap.weather.exception.user.UserAlreadyExistsException;
 import org.roadmap.weather.repository.AuthRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -15,6 +17,7 @@ import java.util.Optional;
 
 @Repository
 public class AuthRepositoryImpl implements AuthRepository {
+    private static final Logger logger = LoggerFactory.getLogger(AuthRepositoryImpl.class);
     private static final String SAVE = """
             INSERT INTO users(login, password)
             VALUES (?, ?)
@@ -44,9 +47,12 @@ public class AuthRepositoryImpl implements AuthRepository {
                     user.getLogin(),
                     user.getPassword()
             );
+            logger.info("Save new user: login={} password={}", user.getLogin(), user.getPassword());
         } catch (DuplicateKeyException ex) {
+            logger.debug("Failed to save user: user with that username exists");
             throw new UserAlreadyExistsException(ExceptionMessages.USERNAME_TAKEN);
         } catch (DataIntegrityViolationException ex) {
+            logger.debug("Failed to save user: wrong login or password");
             throw new InvalidUserParamsException(ExceptionMessages.USER_PARAMS_ARE_NULL);
         }
     }
@@ -54,6 +60,7 @@ public class AuthRepositoryImpl implements AuthRepository {
     @Override
     public Optional<User> findById(Integer id) {
         try {
+            long start = System.currentTimeMillis();
             User user = jdbcTemplate.queryForObject(
                     GET_USER_BY_ID,
                     (rs, rowNum) -> {
@@ -63,8 +70,11 @@ public class AuthRepositoryImpl implements AuthRepository {
                     },
                     id
             );
+            long difference = System.currentTimeMillis() - start;
+            logger.debug("found user={} in {}ms", id, difference);
             return Optional.ofNullable(user);
         } catch (EmptyResultDataAccessException ex) {
+            logger.debug("did not found user={}", id);
             return Optional.empty();
         }
     }

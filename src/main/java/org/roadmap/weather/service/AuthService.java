@@ -8,12 +8,16 @@ import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.exception.user.InvalidUserParamsException;
 import org.roadmap.weather.repository.AuthRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.Optional;
 
 @Service
 public class AuthService {
+    private final static Logger logger = LoggerFactory.getLogger(AuthService.class);
     private final SessionService sessionService;
     private final AuthRepository authRepository;
 
@@ -41,8 +45,10 @@ public class AuthService {
         User user = authRepository.findByLogin(userDto.login())
                 .orElseThrow(() -> new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS));
         if (isPasswordVerified(userDto.password().toCharArray(), user.getPassword())) {
+            logger.info("User={} successfully authorized at {}", userDto.login(), new Timestamp(System.currentTimeMillis()));
             return sessionService.create(user.getId());
         }
+        logger.debug("User={} failed to authorize at {}", userDto.login(), new Timestamp(System.currentTimeMillis()));
         throw new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS);
     }
 
