@@ -1,14 +1,11 @@
 package org.roadmap.weather.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.exception.location.LocationAlreadyExistsForUserException;
-import org.roadmap.weather.exception.user.UserNotFoundException;
-import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.service.LocationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,36 +16,27 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 public class LocationController {
     private final LocationService locationService;
-    private final AuthService authService;
 
-    public LocationController(
-            LocationService locationService,
-            AuthService authService
-    ) {
+    public LocationController(LocationService locationService) {
         this.locationService = locationService;
-        this.authService = authService;
     }
 
     @GetMapping("/search")
     public String findLocations(
             @RequestParam String name,
             @RequestAttribute(name = "userId", required = false) Integer userId,
+            @RequestAttribute(name = "userLogin", required = false) String login,
             HttpServletResponse response,
             Model model
     ) {
         if (userId == null) {
             model.addAttribute("isUserAuthorized", false);
         } else {
-            Optional<String> login = authService.getLoginById(userId);
-            if (login.isEmpty()) {
-                throw new UserNotFoundException(ExceptionMessages.USER_NOT_FOUND);
-            }
-            model.addAttribute("userLogin", login.get());
+            model.addAttribute("userLogin", login);
             model.addAttribute("isUserAuthorized", true);
         }
         try {

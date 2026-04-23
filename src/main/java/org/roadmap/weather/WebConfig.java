@@ -17,10 +17,10 @@ import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 @EnableScheduling
 @EnableAspectJAutoProxy
 public class WebConfig implements WebMvcConfigurer {
-    private final SessionInterceptor sessionInterceptor;
+    private final AuthInterceptor authInterceptor;
 
-    public WebConfig(SessionInterceptor sessionInterceptor) {
-        this.sessionInterceptor = sessionInterceptor;
+    public WebConfig(AuthInterceptor authInterceptor) {
+        this.authInterceptor = authInterceptor;
     }
 
     @Bean
@@ -53,7 +53,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(sessionInterceptor)
+        registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
                         "/css/**",

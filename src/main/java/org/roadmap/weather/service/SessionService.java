@@ -46,11 +46,6 @@ public class SessionService {
         return false;
     }
 
-    public Optional<Integer> getUserIdFromSession(String sessionId) {
-        Optional<Session> session = sessionRepository.findById(sessionId);
-        return session.map(Session::getUserId);
-    }
-
     @Loggable
     public void deleteExpiredSessions() {
         sessionRepository.deleteExpiredSessions();
@@ -62,5 +57,20 @@ public class SessionService {
 
     private boolean isExpired(Session session) {
         return session.getExpiresAt().before(new Timestamp(System.currentTimeMillis()));
+    }
+
+    public Optional<SessionDto> getSession(String sessionId) {
+        Optional<Session> session = sessionRepository.findById(sessionId);
+        if (session.isPresent()) {
+            Session foundSession = session.get();
+            return Optional.of(
+                    new SessionDto(
+                            foundSession.getId(),
+                            foundSession.getUserId(),
+                            foundSession.getExpiresAt()
+                    )
+            );
+        }
+        return Optional.empty();
     }
 }
