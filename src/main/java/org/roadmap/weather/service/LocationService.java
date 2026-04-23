@@ -2,6 +2,7 @@ package org.roadmap.weather.service;
 
 import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.LocationDto;
+import org.roadmap.weather.dto.response.LocationResponseDto;
 import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
@@ -13,11 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -31,7 +29,6 @@ public class LocationService {
     private String apiKey;
     private final LocationRepository locationRepository;
     private final RestTemplate restTemplate = new RestTemplate();
-    private final ObjectMapper jsonMapper = new ObjectMapper();
 
     public LocationService(LocationRepository locationRepository) {
         this.locationRepository = locationRepository;
@@ -48,35 +45,36 @@ public class LocationService {
     }
 
     public List<LocationDto> findByName(String locationName) {
-        String url = String.format("https://api.openweathermap.org/geo/1.0/direct?q=%s&limit=%s&appid=%s", locationName, 10, apiKey);
+        String url = String.format(
+                "https://api.openweathermap.org/geo/1.0/direct?q=%s&limit=%s&appid=%s",
+                locationName,
+                10,
+                apiKey
+        );
         try {
             long start = System.currentTimeMillis();
             logger.info("Starting: external API call - searching for locations...");
-            String json = restTemplate.getForObject(url, String.class);
-            JsonNode root = jsonMapper.readTree(json);
+
+            LocationResponseDto[] response = restTemplate.getForObject(url, LocationResponseDto[].class);
             List<LocationDto> locations = new ArrayList<>();
 
-            for (JsonNode node : root) {
-                String name = node.path("name").asString();
-                BigDecimal latitude = node.path("lat").asDecimal();
-                BigDecimal longitude = node.path("lon").asDecimal();
-
-                LocationDto location = new LocationDto(
-                        name,
-                        latitude,
-                        longitude
-                );
-                locations.add(location);
+            if (response != null) {
+                for (LocationResponseDto location : response) {
+                    locations.add(
+                            new LocationDto(
+                                    location.name(),
+                                    location.lat(),
+                                    location.lon()
+                            )
+                    );
+                }
             }
             long difference = System.currentTimeMillis() - start;
             logger.info("Finished: external API call - searching for locations. Found {} in {}ms", locations.size(), difference);
             return locations;
-        } catch (HttpClientErrorException | HttpServerErrorException ex ) {
+        } catch (RestClientException ex) {
             logger.warn("External API call 'searching for locations' was not finished. {}", ex.getMessage());
             throw new GeocodingApiCallException(ex.getMessage());
-        } catch (Exception ex) {
-            logger.warn("External API call 'searching weather for locations' was not finished. {}", ex.getMessage());
-            throw ex;
         }
     }
 
