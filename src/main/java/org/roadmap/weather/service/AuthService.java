@@ -1,7 +1,6 @@
 package org.roadmap.weather.service;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
-import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
@@ -27,12 +26,12 @@ public class AuthService {
     }
 
     @Loggable
-    public void register(UserRegisterDto user) {
-        if (!user.password().equals(user.repeatedPassword())) {
+    public void register(UserRegisterDto userDto) {
+        if (!userDto.password().equals(userDto.repeatedPassword())) {
             throw new PasswordsDoNotMatchException(ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
         }
-        String hashPassword = getEncryptedPassword(user.password());
-        User userToSave = new User(user.username(), hashPassword);
+        String hashPassword = getEncryptedPassword(userDto.password());
+        User userToSave = new User(userDto.username(), hashPassword);
         try {
             authRepository.save(userToSave);
         } catch (InvalidUserParamsException ex) {

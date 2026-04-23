@@ -3,6 +3,7 @@ package org.roadmap.weather.service;
 import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.entity.Session;
+import org.roadmap.weather.mapper.SessionMapper;
 import org.roadmap.weather.repository.SessionRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +14,11 @@ import java.util.UUID;
 @Service
 public class SessionService {
     private final SessionRepository sessionRepository;
+    private final SessionMapper sessionMapper;
 
-    public SessionService(SessionRepository sessionRepository) {
+    public SessionService(SessionRepository sessionRepository, SessionMapper sessionMapper) {
         this.sessionRepository = sessionRepository;
+        this.sessionMapper = sessionMapper;
     }
 
     @Loggable
@@ -28,11 +31,7 @@ public class SessionService {
         Session session = new Session(sessionId, userId, expiredAt);
 
         sessionRepository.save(session);
-        return new SessionDto(
-                sessionId,
-                userId,
-                expiredAt
-        );
+        return sessionMapper.toDto(session);
     }
 
     public boolean isSessionValid(String sessionId) {
@@ -63,13 +62,7 @@ public class SessionService {
         Optional<Session> session = sessionRepository.findById(sessionId);
         if (session.isPresent()) {
             Session foundSession = session.get();
-            return Optional.of(
-                    new SessionDto(
-                            foundSession.getId(),
-                            foundSession.getUserId(),
-                            foundSession.getExpiresAt()
-                    )
-            );
+            return Optional.of(sessionMapper.toDto(foundSession));
         }
         return Optional.empty();
     }

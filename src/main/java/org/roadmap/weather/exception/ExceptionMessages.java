@@ -19,4 +19,6 @@ public final class ExceptionMessages {
 
     public static final String REQUIRE_AUTHORIZATION = "You need to be authorized to do that.";
     public static final String USER_ALREADY_HAS_LOCATION = "You already has this location. Please choose a different one";
+
+    public static final String MISSING_DATA_FROM_RESPONSE = "Missing weather data from API response.";
 }

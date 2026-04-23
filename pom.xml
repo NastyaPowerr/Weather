@@ -31,6 +31,7 @@
         <mockity-junit-jupiter.version>5.21.0</mockity-junit-jupiter.version>
         <slf4j.version>2.0.17</slf4j.version>
         <logback-classic.version>1.5.32</logback-classic.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
 
         <spring-webmvc.version>7.0.6</spring-webmvc.version>
         <spring-jdbc.version>7.0.6</spring-jdbc.version>
@@ -165,6 +166,11 @@
             <version>${spring-aspects.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -184,6 +190,13 @@
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
                     <parameters>true</parameters>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>

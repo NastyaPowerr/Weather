@@ -7,6 +7,7 @@ import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
+import org.roadmap.weather.mapper.LocationMapper;
 import org.roadmap.weather.repository.LocationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,13 +26,17 @@ import java.util.List;
 @PropertySource("classpath:application.properties")
 public class LocationService {
     private final static Logger logger = LoggerFactory.getLogger(LocationService.class);
-    @Value("${weather.api.key}")
-    private String apiKey;
+
     private final LocationRepository locationRepository;
+    private final LocationMapper locationMapper;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public LocationService(LocationRepository locationRepository) {
+    @Value("${weather.api.key}")
+    private String apiKey;
+
+    public LocationService(LocationRepository locationRepository, LocationMapper locationMapper) {
         this.locationRepository = locationRepository;
+        this.locationMapper = locationMapper;
     }
 
     @Loggable
@@ -60,13 +65,7 @@ public class LocationService {
 
             if (response != null) {
                 for (LocationResponseDto location : response) {
-                    locations.add(
-                            new LocationDto(
-                                    location.name(),
-                                    location.lat(),
-                                    location.lon()
-                            )
-                    );
+                    locations.add(locationMapper.toDto(location));
                 }
             }
             long difference = System.currentTimeMillis() - start;
