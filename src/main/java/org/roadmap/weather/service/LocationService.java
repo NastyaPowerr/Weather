@@ -1,5 +1,6 @@
 package org.roadmap.weather.service;
 
+import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
@@ -36,6 +37,7 @@ public class LocationService {
         this.locationRepository = locationRepository;
     }
 
+    @Loggable
     public void add(String name, String latitude, String longitude, Integer userId) {
         locationRepository.save(new Location(
                 name,
@@ -69,11 +71,11 @@ public class LocationService {
             long difference = System.currentTimeMillis() - start;
             logger.info("Finished: external API call - searching for locations. Found {} in {}ms", locations.size(), difference);
             return locations;
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            logger.info("External API call 'searching for locations' was not finished. Error {}", ex.getStatusCode());
+        } catch (HttpClientErrorException | HttpServerErrorException ex ) {
+            logger.warn("External API call 'searching for locations' was not finished. {}", ex.getMessage());
             throw new GeocodingApiCallException(ex.getMessage());
         } catch (Exception ex) {
-            logger.info("External API call 'searching weather for locations' was not finished. Error {}", ex.getStackTrace());
+            logger.warn("External API call 'searching weather for locations' was not finished. {}", ex.getMessage());
             throw ex;
         }
     }
@@ -85,14 +87,11 @@ public class LocationService {
             List<Location> locations = locationRepository.findByUserId(userId);
             for (Location location : locations) {
                 if (location.getId().equals(id)) {
-                    long start = System.currentTimeMillis();
                     locationRepository.deleteById(id);
-                    long difference = System.currentTimeMillis() - start;
-                    logger.debug("user={} deleted location={} in {}ms", userId, locationId, difference);
+                    logger.info("User={} deleted location={}", userId, locationId);
                 }
             }
         } catch (NumberFormatException ex) {
-            logger.debug("user={} tried to delete location={}", userId, locationId);
             throw new ValidationException(ExceptionMessages.LOCATION_NOT_FOUND_FOR_USER);
         }
     }

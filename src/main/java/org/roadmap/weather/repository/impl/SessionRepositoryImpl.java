@@ -71,10 +71,7 @@ public class SessionRepositoryImpl implements SessionRepository {
     }
 
     @Override
-    public void deleteExpiredSessions() {
-        long start = System.currentTimeMillis();
-        int rows = jdbcTemplate.update(DELETE_EXPIRED);
-        long difference = System.currentTimeMillis() - start;
-        logger.info("Deleted {} expired sessions in {}ms", rows, difference);
+    public int deleteExpiredSessions() {
+        return jdbcTemplate.update(DELETE_EXPIRED);
     }
 }

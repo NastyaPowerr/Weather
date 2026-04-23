@@ -70,14 +70,15 @@ public class WeatherService {
                         )
                 );
             } catch (HttpClientErrorException | HttpServerErrorException ex) {
-                logger.info("External API call 'searching weather for locations' was not finished. Error {}", ex.getStatusCode());
+                logger.warn("External API call 'searching weather for locations' was not finished. {}", ex.getMessage());
                 throw new GeocodingApiCallException(ex.getMessage());
             } catch (Exception ex) {
-                logger.info("External API call 'searching weather for locations' was not finished. Error {}", ex.getStackTrace());
+                logger.warn("External API call 'searching weather for locations' was not finished. {}", ex.getMessage());
+                throw ex;
             }
         }
         long difference = System.currentTimeMillis() - start;
-        logger.info("Finished:API call - searching weather for locations. Found {} in {}ms", weathers.size(), difference);
+        logger.info("Finished: API call - searching weather for locations. Found {} in {}ms", weathers.size(), difference);
         return weathers;
     }
 }

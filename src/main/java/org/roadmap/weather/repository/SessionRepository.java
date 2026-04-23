@@ -9,5 +9,5 @@ public interface SessionRepository extends BaseRepository<Session> {
 
     void deleteById(String id);
 
-    void deleteExpiredSessions();
+    int deleteExpiredSessions();
 }

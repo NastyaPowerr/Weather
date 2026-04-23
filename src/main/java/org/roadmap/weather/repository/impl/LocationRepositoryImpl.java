@@ -4,8 +4,6 @@ import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.location.LocationAlreadyExistsForUserException;
 import org.roadmap.weather.repository.LocationRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -15,7 +13,6 @@ import java.util.List;
 
 @Repository
 public class LocationRepositoryImpl implements LocationRepository {
-    private static final Logger logger = LoggerFactory.getLogger(LocationRepositoryImpl.class);
     private static final String SAVE = """
             INSERT INTO locations(name, user_id, latitude, longitude)
             VALUES (?, ?, ?, ?)
@@ -39,7 +36,6 @@ public class LocationRepositoryImpl implements LocationRepository {
 
     @Override
     public void save(Location location) {
-        long start = System.currentTimeMillis();
         try {
             jdbcTemplate.update(
                     SAVE,
@@ -48,18 +44,13 @@ public class LocationRepositoryImpl implements LocationRepository {
                     location.getLatitude(),
                     location.getLongitude()
             );
-            long end = System.currentTimeMillis() - start;
-            logger.info("user={} saved location={} in {}ms", location.getUserId(), location.getName(), end);
         } catch (DuplicateKeyException ex) {
-            long difference = System.currentTimeMillis() - start;
-            logger.warn("user={} failed to save location={}, {}ms", location.getUserId(), location.getName(), difference);
             throw new LocationAlreadyExistsForUserException(ExceptionMessages.LOCATION_CONFLICT_FOR_USER);
         }
     }
 
     @Override
     public List<Location> findByUserId(Integer userId) {
-        long start = System.currentTimeMillis();
         List<Location> locations = jdbcTemplate.query(
                 GET_BY_USER_ID,
                 (rs, rowNum) -> {
@@ -76,8 +67,6 @@ public class LocationRepositoryImpl implements LocationRepository {
                 },
                 userId
         );
-        long difference = System.currentTimeMillis() - start;
-        logger.debug("found {} locations for user={} in {}ms", locations.size(), userId, difference);
         return locations;
     }
 
