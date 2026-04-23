@@ -4,8 +4,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
-import org.roadmap.weather.exception.location.GeocodingApiCallException;
-import org.roadmap.weather.exception.location.LocationAlreadyExistsForUserException;
 import org.roadmap.weather.service.LocationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -30,7 +27,6 @@ public class LocationController {
             @RequestParam String name,
             @RequestAttribute(name = "userId", required = false) Integer userId,
             @RequestAttribute(name = "userLogin", required = false) String login,
-            HttpServletResponse response,
             Model model
     ) {
         if (userId == null) {
@@ -39,15 +35,10 @@ public class LocationController {
             model.addAttribute("userLogin", login);
             model.addAttribute("isUserAuthorized", true);
         }
-        try {
-            List<LocationDto> locations = locationService.findByName(name);
-            model.addAttribute("locations", locations);
-            model.addAttribute("locationName", name);
-            return "search-results";
-        } catch (GeocodingApiCallException ex) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return "redirect:/error";
-        }
+        List<LocationDto> locations = locationService.findByName(name);
+        model.addAttribute("locations", locations);
+        model.addAttribute("locationName", name);
+        return "search-results";
     }
 
     @PostMapping("/locations")
@@ -57,21 +48,15 @@ public class LocationController {
             @RequestParam String longitude,
             @RequestAttribute(name = "userId", required = false) Integer userId,
             HttpServletResponse response,
-            Model model,
-            RedirectAttributes redirectAttributes
+            Model model
     ) {
-        try {
-            if (userId == null) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                model.addAttribute("error", ExceptionMessages.REQUIRE_AUTHORIZATION);
-                return "redirect:/auth/sign-in";
-            }
-            locationService.add(name, latitude, longitude, userId);
-            return "redirect:/";
-        } catch (LocationAlreadyExistsForUserException ex) {
-            redirectAttributes.addFlashAttribute("error", ExceptionMessages.USER_ALREADY_HAS_LOCATION);
-            return "redirect:/search?name=" + name;
+        if (userId == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            model.addAttribute("error", ExceptionMessages.REQUIRE_AUTHORIZATION);
+            return "redirect:/auth/sign-in";
         }
+        locationService.add(name, latitude, longitude, userId);
+        return "redirect:/";
     }
 
     @PostMapping("/locations/delete")

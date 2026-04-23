@@ -2,7 +2,6 @@ package org.roadmap.weather.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.dto.Weather;
-import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.service.WeatherService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,15 +31,10 @@ public class WeatherController {
             model.addAttribute("isUserAuthorized", false);
             return "index";
         }
-        try {
-            List<Weather> weathers = weatherService.getWeathersForUser(userId);
-            model.addAttribute("userLogin", login);
-            model.addAttribute("weathers", weathers);
-            model.addAttribute("isUserAuthorized", true);
-            return "index";
-        } catch (GeocodingApiCallException ex) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return "redirect:/error";
-        }
+        List<Weather> weathers = weatherService.getWeathersForUser(userId);
+        model.addAttribute("userLogin", login);
+        model.addAttribute("weathers", weathers);
+        model.addAttribute("isUserAuthorized", true);
+        return "index";
     }
 }

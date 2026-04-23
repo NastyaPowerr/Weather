@@ -7,8 +7,6 @@ import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.dto.request.UserRegistrationRequest;
 import org.roadmap.weather.exception.ExceptionMessages;
-import org.roadmap.weather.exception.user.InvalidUserParamsException;
-import org.roadmap.weather.exception.user.UserAlreadyExistsException;
 import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.util.CookieManagerUtil;
 import org.springframework.stereotype.Controller;
@@ -19,8 +17,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.UUID;
 
 @Controller
 @RequestMapping("/auth")
@@ -55,13 +51,7 @@ public class AuthController {
             return "sign-up";
         }
         UserDto userToRegister = new UserDto(user.username(), user.password());
-        try {
-            authService.register(userToRegister);
-        } catch (UserAlreadyExistsException ex) {
-            model.addAttribute("error", ExceptionMessages.USERNAME_TAKEN);
-            response.setStatus(HttpServletResponse.SC_CONFLICT);
-            return "sign-up";
-        }
+        authService.register(userToRegister);
         return "redirect:/";
     }
 
@@ -73,21 +63,14 @@ public class AuthController {
     @PostMapping("/sign-in")
     public String login(
             UserDto user,
-            HttpServletResponse response,
-            Model model
+            HttpServletResponse response
     ) {
-        try {
-            SessionDto session = authService.authorize(user);
-            String sessionId = String.valueOf(session.id());
-            Cookie cookie = CookieManagerUtil.createCookie(sessionId);
-            response.addCookie(cookie);
-            response.setStatus(HttpServletResponse.SC_OK);
-            return "redirect:/";
-        } catch (InvalidUserParamsException ex) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            model.addAttribute("error", ex.getMessage());
-            return "sign-in";
-        }
+        SessionDto session = authService.authorize(user);
+        String sessionId = String.valueOf(session.id());
+        Cookie cookie = CookieManagerUtil.createCookie(sessionId);
+        response.addCookie(cookie);
+        response.setStatus(HttpServletResponse.SC_OK);
+        return "redirect:/";
     }
 
     @PostMapping("/sign-out")
