@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
-import org.roadmap.weather.dto.request.UserRegistrationRequest;
+import org.roadmap.weather.dto.UserRegisterDto;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.util.CookieManagerUtil;
@@ -34,7 +34,7 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public String register(
-            @Valid @ModelAttribute UserRegistrationRequest user,
+            @Valid @ModelAttribute UserRegisterDto user,
             BindingResult res,
             HttpServletResponse response,
             Model model
@@ -45,13 +45,7 @@ public class AuthController {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return "sign-up";
         }
-        if (!user.password().equals(user.repeatedPassword())) {
-            model.addAttribute("error", ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return "sign-up";
-        }
-        UserDto userToRegister = new UserDto(user.username(), user.password());
-        authService.register(userToRegister);
+        authService.register(user);
         return "redirect:/";
     }
 

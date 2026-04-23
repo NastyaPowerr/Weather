@@ -1,13 +1,16 @@
 package org.roadmap.weather.service;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
+import org.roadmap.weather.dto.UserRegisterDto;
 import org.roadmap.weather.entity.User;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.exception.user.InvalidUserParamsException;
+import org.roadmap.weather.exception.user.PasswordsDoNotMatchException;
 import org.roadmap.weather.repository.AuthRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +27,12 @@ public class AuthService {
     }
 
     @Loggable
-    public void register(UserDto user) {
-        if (user.password() == null) {
-            throw new ValidationException("Password cannot be null");
+    public void register(UserRegisterDto user) {
+        if (!user.password().equals(user.repeatedPassword())) {
+            throw new PasswordsDoNotMatchException(ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
         }
         String hashPassword = getEncryptedPassword(user.password());
-        User userToSave = new User(user.login(), hashPassword);
+        User userToSave = new User(user.username(), hashPassword);
         try {
             authRepository.save(userToSave);
         } catch (InvalidUserParamsException ex) {

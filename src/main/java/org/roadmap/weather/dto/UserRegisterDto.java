@@ -1,4 +1,4 @@
-package org.roadmap.weather.dto.request;
+package org.roadmap.weather.dto;
 
 import org.hibernate.validator.constraints.Length;
 import org.roadmap.weather.util.ValidationConstants;
@@ -6,7 +6,7 @@ import org.roadmap.weather.util.ValidationConstants;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-public record UserRegistrationRequest(
+public record UserRegisterDto(
         @NotBlank(message = ValidationConstants.MISSING_LOGIN)
         @Length(
                 min = ValidationConstants.MIN_LOGIN_LENGTH,

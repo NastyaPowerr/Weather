@@ -6,6 +6,7 @@ import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.exception.location.LocationAlreadyExistsForUserException;
 import org.roadmap.weather.exception.user.InvalidUserParamsException;
+import org.roadmap.weather.exception.user.PasswordsDoNotMatchException;
 import org.roadmap.weather.exception.user.UserAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @ControllerAdvice(annotations = Controller.class)
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(PasswordsDoNotMatchException.class)
+    public String handlePasswordDoNotMatch(HttpServletResponse response, Model model) {
+        model.addAttribute("error", ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return "sign-up";
+    }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public String handleUserAlreadyExists(HttpServletResponse response, Model model) {
