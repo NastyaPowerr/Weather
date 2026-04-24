@@ -2,8 +2,7 @@ package org.roadmap.weather.repository.impl;
 
 import org.roadmap.weather.entity.Session;
 import org.roadmap.weather.repository.SessionRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -13,7 +12,6 @@ import java.util.UUID;
 
 @Repository
 public class SessionRepositoryImpl implements SessionRepository {
-    private final static Logger logger = LoggerFactory.getLogger(SessionRepositoryImpl.class);
     private final static String SAVE = """
             INSERT INTO sessions(id, user_id, expires_at)
             VALUES (?, ?, ?)
@@ -52,17 +50,21 @@ public class SessionRepositoryImpl implements SessionRepository {
 
     @Override
     public Optional<Session> findById(String id) {
-        return Optional.ofNullable(
-                jdbcTemplate.queryForObject(
-                        GET_BY_ID,
-                        (rs, rowNum) -> {
-                            UUID sessionId = UUID.fromString(rs.getString("id"));
-                            Integer userId = rs.getInt("user_id");
-                            Timestamp expiresAt = rs.getTimestamp("expires_at");
-                            return new Session(sessionId, userId, expiresAt);
-                        },
-                        id)
-        );
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(
+                            GET_BY_ID,
+                            (rs, rowNum) -> {
+                                UUID sessionId = UUID.fromString(rs.getString("id"));
+                                Integer userId = rs.getInt("user_id");
+                                Timestamp expiresAt = rs.getTimestamp("expires_at");
+                                return new Session(sessionId, userId, expiresAt);
+                            },
+                            id)
+            );
+        } catch (EmptyResultDataAccessException ex) {
+            return Optional.empty();
+        }
     }
 
     @Override

@@ -57,6 +57,7 @@ public class AuthController {
             @RequestAttribute(name = "sessionId", required = false) String sessionId,
             HttpServletResponse response
     ) {
+        // проверка, чтобы уменьшить кол-во вызовов к БД
         if (sessionId != null) {
             authService.logout(sessionId);
         }
