@@ -6,14 +6,10 @@ import jakarta.validation.Valid;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.dto.UserRegisterDto;
-import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.util.CookieManagerUtil;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,18 +29,7 @@ public class AuthController {
     }
 
     @PostMapping("/sign-up")
-    public String register(
-            @Valid @ModelAttribute UserRegisterDto user,
-            BindingResult res,
-            HttpServletResponse response,
-            Model model
-    ) {
-        if (res.hasErrors()) {
-            String error = res.getAllErrors().get(0).getDefaultMessage();
-            model.addAttribute("error", error);
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return "sign-up";
-        }
+    public String register(@Valid UserRegisterDto user) {
         authService.register(user);
         return "redirect:/";
     }
@@ -56,7 +41,7 @@ public class AuthController {
 
     @PostMapping("/sign-in")
     public String login(
-            UserDto user,
+            @Valid UserDto user,
             HttpServletResponse response
     ) {
         SessionDto session = authService.authorize(user);

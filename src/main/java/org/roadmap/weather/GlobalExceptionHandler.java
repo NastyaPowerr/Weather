@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -46,6 +47,26 @@ public class GlobalExceptionHandler {
         redirectAttributes.addFlashAttribute("error", ExceptionMessages.USER_ALREADY_HAS_LOCATION);
         String referer = request.getHeader("Referer");
         return "redirect:" + referer;
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public String handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletResponse response, Model model, HttpServletRequest request) {
+        String error = ex
+                .getBindingResult()
+                .getAllErrors()
+                .get(0)
+                .getDefaultMessage();
+        model.addAttribute("error", error);
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        String uri = request.getRequestURI();
+        logger.debug("User could not {}. {}", uri, error);
+        if (uri.contains("sign-in")) {
+            return "sign-in";
+        }
+        if (uri.contains("sign-up")) {
+            return "sign-up";
+        }
+        return "error";
     }
 
     @ExceptionHandler(GeocodingApiCallException.class)
