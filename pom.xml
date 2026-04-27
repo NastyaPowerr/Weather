@@ -32,9 +32,12 @@
         <mockity-junit-jupiter.version>5.21.0</mockity-junit-jupiter.version>
         <slf4j.version>2.0.17</slf4j.version>
         <logback-classic.version>1.5.32</logback-classic.version>
-        <mapstruct.version>1.6.3</mapstruct.version>
         <hikariCP.version>7.0.2</hikariCP.version>
         <jboss-logging.version>3.6.3.Final</jboss-logging.version>
+
+        <mapstruct.version>1.6.3</mapstruct.version>
+        <lombok.version>1.18.42</lombok.version>
+        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 
         <spring-webmvc.version>7.0.6</spring-webmvc.version>
         <spring-jdbc.version>7.0.6</spring-jdbc.version>
@@ -198,6 +201,17 @@
             <version>${jboss-logging.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency><dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok-mapstruct-binding</artifactId>
+        <version>${lombok-mapstruct-binding.version}</version>
+        <scope>compile</scope>
+    </dependency>
     </dependencies>
 
     <build>
@@ -218,6 +232,11 @@
                     <target>${maven.compiler.target}</target>
                     <parameters>true</parameters>
                     <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
                         <path>
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>

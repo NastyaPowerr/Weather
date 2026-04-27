@@ -1,5 +1,6 @@
 package org.roadmap.weather.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.dto.Weather;
 import org.roadmap.weather.dto.response.WeatherResponseDto;
 import org.roadmap.weather.entity.Location;
@@ -7,23 +8,19 @@ import org.roadmap.weather.exception.WeatherParseException;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.mapper.WeatherMapper;
 import org.roadmap.weather.repository.LocationRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @PropertySource("classpath:application.properties")
+@Slf4j
 public class WeatherService {
-    private final static Logger logger = LoggerFactory.getLogger(WeatherService.class);
-
     private final RestTemplate restTemplate = new RestTemplate();
     private final LocationRepository locationRepository;
     private final WeatherMapper weatherMapper;
@@ -41,7 +38,7 @@ public class WeatherService {
         List<Weather> weathers = new ArrayList<>();
 
         long start = System.currentTimeMillis();
-        logger.info("Starting: external API call - searching weather for locations...");
+        log.info("Starting: external API call - searching weather for locations...");
 
         for (Location location : locations) {
             String url = constructUrl(location);
@@ -50,15 +47,15 @@ public class WeatherService {
                 try {
                     weathers.add(weatherMapper.toWeather(location, response));
                 } catch (WeatherParseException ex) {
-                    logger.warn("Couldn't map weather response for location={}", location.getId());
+                    log.warn("Couldn't map weather response for location={}", location.getId());
                 }
             } catch (RestClientException ex) {
-                logger.warn("External API call 'searching weather for locations' was not finished. {}", ex.getMessage());
+                log.warn("External API call 'searching weather for locations' was not finished. {}", ex.getMessage());
                 throw new GeocodingApiCallException(ex.getMessage());
             }
         }
         long difference = System.currentTimeMillis() - start;
-        logger.info("Finished: API call - searching weather for locations. Found {} in {}ms", weathers.size(), difference);
+        log.info("Finished: API call - searching weather for locations. Found {} in {}ms", weathers.size(), difference);
         return weathers;
     }
 

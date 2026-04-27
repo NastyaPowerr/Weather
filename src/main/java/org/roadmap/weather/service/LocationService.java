@@ -1,5 +1,6 @@
 package org.roadmap.weather.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.response.LocationResponseDto;
@@ -9,8 +10,6 @@ import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.mapper.LocationMapper;
 import org.roadmap.weather.repository.LocationRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -24,8 +23,8 @@ import java.util.List;
 
 @Service
 @PropertySource("classpath:application.properties")
+@Slf4j
 public class LocationService {
-    private final static Logger logger = LoggerFactory.getLogger(LocationService.class);
 
     private final LocationRepository locationRepository;
     private final LocationMapper locationMapper;
@@ -58,7 +57,7 @@ public class LocationService {
         );
         try {
             long start = System.currentTimeMillis();
-            logger.info("Starting: external API call - searching for locations...");
+            log.info("Starting: external API call - searching for locations...");
 
             LocationResponseDto[] response = restTemplate.getForObject(url, LocationResponseDto[].class);
             List<LocationDto> locations = new ArrayList<>();
@@ -69,10 +68,10 @@ public class LocationService {
                 }
             }
             long difference = System.currentTimeMillis() - start;
-            logger.info("Finished: external API call - searching for locations. Found {} in {}ms", locations.size(), difference);
+            log.info("Finished: external API call - searching for locations. Found {} in {}ms", locations.size(), difference);
             return locations;
         } catch (RestClientException ex) {
-            logger.warn("External API call 'searching for locations' was not finished. {}", ex.getMessage());
+            log.warn("External API call 'searching for locations' was not finished. {}", ex.getMessage());
             throw new GeocodingApiCallException(ex.getMessage());
         }
     }
@@ -85,7 +84,7 @@ public class LocationService {
             for (Location location : locations) {
                 if (location.getId().equals(id)) {
                     locationRepository.deleteById(id);
-                    logger.info("User={} deleted location={}", userId, locationId);
+                    log.info("User={} deleted location={}", userId, locationId);
                 }
             }
         } catch (NumberFormatException ex) {
