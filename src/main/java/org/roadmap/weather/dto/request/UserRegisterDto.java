@@ -1,4 +1,4 @@
-package org.roadmap.weather.dto;
+package org.roadmap.weather.dto.request;
 
 import org.hibernate.validator.constraints.Length;
 import org.roadmap.weather.util.ValidationConstants;

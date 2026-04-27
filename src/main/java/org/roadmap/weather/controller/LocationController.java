@@ -2,6 +2,7 @@ package org.roadmap.weather.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.dto.LocationDto;
+import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.service.LocationService;
@@ -25,14 +26,13 @@ public class LocationController {
     @GetMapping("/search")
     public String findLocations(
             @RequestParam String name,
-            @RequestAttribute(name = "userId", required = false) Integer userId,
-            @RequestAttribute(name = "userLogin", required = false) String login,
+            @RequestAttribute(name = "user", required = false) UserDto user,
             Model model
     ) {
-        if (userId == null) {
+        if (user == null) {
             model.addAttribute("isUserAuthorized", false);
         } else {
-            model.addAttribute("userLogin", login);
+            model.addAttribute("userLogin", user.login());
             model.addAttribute("isUserAuthorized", true);
         }
         List<LocationDto> locations = locationService.findByName(name);
@@ -46,31 +46,31 @@ public class LocationController {
             @RequestParam String name,
             @RequestParam String latitude,
             @RequestParam String longitude,
-            @RequestAttribute(name = "userId", required = false) Integer userId,
+            @RequestAttribute(name = "user", required = false) UserDto user,
             HttpServletResponse response,
             Model model
     ) {
-        if (userId == null) {
+        if (user == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             model.addAttribute("error", ExceptionMessages.REQUIRE_AUTHORIZATION);
             return "redirect:/auth/sign-in";
         }
-        locationService.add(name, latitude, longitude, userId);
+        locationService.add(name, latitude, longitude, user);
         return "redirect:/";
     }
 
     @PostMapping("/locations/delete")
     public String deleteLocation(
             @RequestParam String locationId,
-            @RequestAttribute(name = "userId", required = false) Integer userId,
+            @RequestAttribute(name = "user", required = false) UserDto user,
             HttpServletResponse response
     ) {
         try {
-            if (userId == null) {
+            if (user == null) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return "redirect:/auth/sign-in";
             }
-            locationService.delete(locationId, userId);
+            locationService.delete(locationId, user.id());
             return "redirect:/";
         } catch (ValidationException ex) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);

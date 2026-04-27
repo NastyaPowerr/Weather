@@ -4,8 +4,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.roadmap.weather.dto.SessionDto;
-import org.roadmap.weather.dto.UserDto;
-import org.roadmap.weather.dto.UserRegisterDto;
+import org.roadmap.weather.dto.request.UserLoginDto;
+import org.roadmap.weather.dto.request.UserRegisterDto;
 import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.util.CookieManagerUtil;
 import org.springframework.stereotype.Controller;
@@ -41,7 +41,7 @@ public class AuthController {
 
     @PostMapping("/sign-in")
     public String login(
-            @Valid UserDto user,
+            @Valid UserLoginDto user,
             HttpServletResponse response
     ) {
         SessionDto session = authService.authorize(user);

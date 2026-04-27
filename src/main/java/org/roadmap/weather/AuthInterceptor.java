@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.dto.SessionDto;
+import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.service.SessionService;
 import org.springframework.stereotype.Component;
@@ -33,14 +34,9 @@ public class AuthInterceptor implements HandlerInterceptor {
                 Optional<SessionDto> session = sessionService.getSession(sessionId.get());
                 if (session.isPresent()) {
                     SessionDto currentSession = session.get();
-                    Optional<String> username = authService.getLoginById(currentSession.userId());
-                    if (username.isPresent()) {
-                        request.setAttribute("userLogin", username.get());
-                    }
-                    request.setAttribute("userId", currentSession.userId());
+                    UserDto user = authService.getById(currentSession.userId());
+                    request.setAttribute("user", user);
                     request.setAttribute("sessionId", currentSession.id());
-                } else {
-                    return false;
                 }
             }
         }

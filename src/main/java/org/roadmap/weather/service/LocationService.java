@@ -3,8 +3,10 @@ package org.roadmap.weather.service;
 import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.LocationDto;
+import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.dto.response.LocationResponseDto;
 import org.roadmap.weather.entity.Location;
+import org.roadmap.weather.entity.User;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
@@ -38,13 +40,14 @@ public class LocationService {
     }
 
     @Loggable
-    public void add(String name, String latitude, String longitude, Integer userId) {
-        locationRepository.save(new Location(
-                name,
-                userId,
-                new BigDecimal(latitude),
-                new BigDecimal(longitude)
-        ));
+    public void add(String name, String latitude, String longitude, UserDto user) {
+        locationRepository.save(
+                new Location(
+                        name,
+                        user.id(),
+                        new BigDecimal(latitude),
+                        new BigDecimal(longitude)
+                ));
     }
 
     public List<LocationDto> findByName(String locationName) {
