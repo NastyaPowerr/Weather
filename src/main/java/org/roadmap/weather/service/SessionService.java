@@ -2,7 +2,7 @@ package org.roadmap.weather.service;
 
 import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.SessionDto;
-import org.roadmap.weather.entity.Session;
+import org.roadmap.weather.entity.SessionEntity;
 import org.roadmap.weather.mapper.SessionMapper;
 import org.roadmap.weather.repository.SessionRepository;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class SessionService {
         long twoHoursInMillis = 2 * 60 * 60 * 1000;
         Timestamp expiredAt = new Timestamp(System.currentTimeMillis() + twoHoursInMillis);
 
-        Session session = new Session(sessionId, userId, expiredAt);
+        SessionEntity session = new SessionEntity(sessionId, userId, expiredAt);
 
         sessionRepository.save(session);
         return sessionMapper.toDto(session);
@@ -36,7 +36,7 @@ public class SessionService {
 
     public boolean isSessionValid(String sessionId) {
         // valid = exists in DB and not expired
-        Optional<Session> session = sessionRepository.findById(sessionId);
+        Optional<SessionEntity> session = sessionRepository.findById(sessionId);
         if (session.isPresent()) {
             if (!isExpired(session.get())) {
                 return true;
@@ -54,14 +54,14 @@ public class SessionService {
         sessionRepository.deleteById(sessionId);
     }
 
-    private boolean isExpired(Session session) {
+    private boolean isExpired(SessionEntity session) {
         return session.getExpiresAt().before(new Timestamp(System.currentTimeMillis()));
     }
 
     public Optional<SessionDto> getSession(String sessionId) {
-        Optional<Session> session = sessionRepository.findById(sessionId);
+        Optional<SessionEntity> session = sessionRepository.findById(sessionId);
         if (session.isPresent()) {
-            Session foundSession = session.get();
+            SessionEntity foundSession = session.get();
             return Optional.of(sessionMapper.toDto(foundSession));
         }
         return Optional.empty();

@@ -1,79 +1,60 @@
 package org.roadmap.weather.repository.impl;
 
-import org.roadmap.weather.entity.Session;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.roadmap.weather.entity.SessionEntity;
 import org.roadmap.weather.repository.SessionRepository;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.util.Optional;
 import java.util.UUID;
 
 @Repository
+@Transactional
 public class SessionRepositoryImpl implements SessionRepository {
-    private final static String SAVE = """
-            INSERT INTO sessions(id, user_id, expires_at)
-            VALUES (?, ?, ?)
-            """;
-    private final static String GET_BY_ID = """
-            SELECT id, user_id, expires_at
-            FROM sessions
-            WHERE id = ?
-            """;
-    private final static String DELETE_EXPIRED = """
+    private final static String DELETE_BY_ID_HQL = """
             DELETE
-            FROM sessions
-            WHERE expires_at < NOW()
+            FROM SessionEntity
+            WHERE id=:id
             """;
-    private final static String DELETE = """
+    private final static String DELETE_EXPIRED_HQL = """
             DELETE
-            FROM sessions
-            WHERE id = ?
+            FROM SessionEntity
+            WHERE expiresAt < CURRENT_TIMESTAMP
             """;
+    private final SessionFactory sessionFactory;
 
-    private final JdbcTemplate jdbcTemplate;
-
-    public SessionRepositoryImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public SessionRepositoryImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
     @Override
-    public void save(Session session) {
-        jdbcTemplate.update(
-                SAVE,
-                session.getId(),
-                session.getUserId(),
-                session.getExpiresAt()
-        );
+    public void save(SessionEntity sessionEntity) {
+        Session session = sessionFactory.getCurrentSession();
+        session.persist(sessionEntity);
+        session.flush();
     }
 
     @Override
-    public Optional<Session> findById(String id) {
-        try {
-            return Optional.ofNullable(
-                    jdbcTemplate.queryForObject(
-                            GET_BY_ID,
-                            (rs, rowNum) -> {
-                                UUID sessionId = UUID.fromString(rs.getString("id"));
-                                Integer userId = rs.getInt("user_id");
-                                Timestamp expiresAt = rs.getTimestamp("expires_at");
-                                return new Session(sessionId, userId, expiresAt);
-                            },
-                            id)
-            );
-        } catch (EmptyResultDataAccessException ex) {
-            return Optional.empty();
-        }
+    public Optional<SessionEntity> findById(String id) {
+        Session session = sessionFactory.getCurrentSession();
+        SessionEntity sessionEntity = session.find(SessionEntity.class, UUID.fromString(id));
+        return Optional.ofNullable(sessionEntity);
     }
 
     @Override
     public void deleteById(String id) {
-        jdbcTemplate.update(DELETE, id);
+        Session session = sessionFactory.getCurrentSession();
+        session.createMutationQuery(DELETE_BY_ID_HQL)
+                .setParameter("id", UUID.fromString(id))
+                .executeUpdate();
     }
 
     @Override
     public int deleteExpiredSessions() {
-        return jdbcTemplate.update(DELETE_EXPIRED);
+        Session session = sessionFactory.getCurrentSession();
+        return session.createMutationQuery(DELETE_EXPIRED_HQL)
+                .executeUpdate();
     }
 }

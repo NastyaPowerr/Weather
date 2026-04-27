@@ -25,7 +25,6 @@ import java.util.List;
 @PropertySource("classpath:application.properties")
 @Slf4j
 public class LocationService {
-
     private final LocationRepository locationRepository;
     private final LocationMapper locationMapper;
     private final RestTemplate restTemplate = new RestTemplate();
