@@ -5,6 +5,7 @@ import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.entity.SessionEntity;
 import org.roadmap.weather.mapper.SessionMapper;
 import org.roadmap.weather.repository.SessionRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -16,6 +17,9 @@ public class SessionService {
     private final SessionRepository sessionRepository;
     private final SessionMapper sessionMapper;
 
+    @Value("${session.duration}")
+    private long sessionDuration;
+
     public SessionService(SessionRepository sessionRepository, SessionMapper sessionMapper) {
         this.sessionRepository = sessionRepository;
         this.sessionMapper = sessionMapper;
@@ -25,8 +29,7 @@ public class SessionService {
     public SessionDto create(Integer userId) {
         UUID sessionId = UUID.randomUUID();
 
-        long twoHoursInMillis = 2 * 60 * 60 * 1000;
-        Timestamp expiredAt = new Timestamp(System.currentTimeMillis() + twoHoursInMillis);
+        Timestamp expiredAt = new Timestamp(System.currentTimeMillis() + sessionDuration);
 
         SessionEntity session = new SessionEntity(sessionId, userId, expiredAt);
 

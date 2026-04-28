@@ -1,23 +1,29 @@
-package org.roadmap.weather.util;
+package org.roadmap.weather.service;
 
 
 import jakarta.servlet.http.Cookie;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-public final class CookieManagerUtil {
-    private CookieManagerUtil() {
+@Component
+public class CookieService {
+    @Value("${cookie.duration}")
+    private int cookieAge;
+
+    private CookieService() {
     }
 
-    public static Cookie createCookie(String sessionId) {
+    public Cookie create(String sessionId) {
         Cookie cookie = new Cookie("sessionId", sessionId);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");
-        cookie.setMaxAge(2 * 60 * 60);
+        cookie.setMaxAge(cookieAge);
         return cookie;
     }
 
     // delete = give cookie with age = 0
-    public static Cookie deleteCookie() {
+    public Cookie delete() {
         Cookie cookie = new Cookie("sessionId", null);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);

@@ -7,7 +7,7 @@ import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.request.UserLoginDto;
 import org.roadmap.weather.dto.request.UserRegisterDto;
 import org.roadmap.weather.service.AuthService;
-import org.roadmap.weather.util.CookieManagerUtil;
+import org.roadmap.weather.service.CookieService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/auth")
 public class AuthController {
     private final AuthService authService;
+    private final CookieService cookieService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, CookieService cookieService) {
         this.authService = authService;
+        this.cookieService = cookieService;
     }
 
     @GetMapping("/sign-up")
@@ -46,7 +48,7 @@ public class AuthController {
     ) {
         SessionDto session = authService.authorize(user);
         String sessionId = String.valueOf(session.id());
-        Cookie cookie = CookieManagerUtil.createCookie(sessionId);
+        Cookie cookie = cookieService.create(sessionId);
         response.addCookie(cookie);
         response.setStatus(HttpServletResponse.SC_OK);
         return "redirect:/";
@@ -61,7 +63,7 @@ public class AuthController {
         if (sessionId != null) {
             authService.logout(sessionId);
         }
-        response.addCookie(CookieManagerUtil.deleteCookie());
+        response.addCookie(cookieService.delete());
         return "redirect:/";
     }
 }

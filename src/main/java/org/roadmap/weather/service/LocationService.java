@@ -29,14 +29,19 @@ import java.util.List;
 public class LocationService {
     private final LocationRepository locationRepository;
     private final LocationMapper locationMapper;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
     @Value("${weather.api.key}")
     private String apiKey;
 
-    public LocationService(LocationRepository locationRepository, LocationMapper locationMapper) {
+    public LocationService(
+            LocationRepository locationRepository,
+            LocationMapper locationMapper,
+            RestTemplate restTemplate
+    ) {
         this.locationRepository = locationRepository;
         this.locationMapper = locationMapper;
+        this.restTemplate = restTemplate;
     }
 
     @Loggable

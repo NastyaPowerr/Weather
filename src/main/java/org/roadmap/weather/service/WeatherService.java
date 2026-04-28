@@ -21,16 +21,21 @@ import java.util.List;
 @PropertySource("classpath:application.properties")
 @Slf4j
 public class WeatherService {
-    private final RestTemplate restTemplate = new RestTemplate();
     private final LocationRepository locationRepository;
     private final WeatherMapper weatherMapper;
+    private final RestTemplate restTemplate;
 
     @Value("${weather.api.key}")
     private String apiKey;
 
-    public WeatherService(LocationRepository locationRepository, WeatherMapper weatherMapper) {
+    public WeatherService(
+            LocationRepository locationRepository,
+            WeatherMapper weatherMapper,
+            RestTemplate restTemplate
+    ) {
         this.locationRepository = locationRepository;
         this.weatherMapper = weatherMapper;
+        this.restTemplate = restTemplate;
     }
 
     public List<Weather> getWeathersForUser(Integer userId) {
