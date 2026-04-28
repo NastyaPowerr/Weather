@@ -21,7 +21,7 @@ import java.util.List;
 @PropertySource("classpath:application.properties")
 @Slf4j
 public class WeatherService {
-    private final LocationRepository locationRepository;
+    private final LocationService locationService;
     private final WeatherMapper weatherMapper;
     private final RestTemplate restTemplate;
 
@@ -29,17 +29,17 @@ public class WeatherService {
     private String apiKey;
 
     public WeatherService(
-            LocationRepository locationRepository,
+            LocationService locationService,
             WeatherMapper weatherMapper,
             RestTemplate restTemplate
     ) {
-        this.locationRepository = locationRepository;
+        this.locationService = locationService;
         this.weatherMapper = weatherMapper;
         this.restTemplate = restTemplate;
     }
 
     public List<Weather> getWeathersForUser(Integer userId) {
-        List<Location> locations = locationRepository.findByUserId(userId);
+        List<Location> locations = locationService.findByUserId(userId);
         List<Weather> weathers = new ArrayList<>();
 
         long start = System.currentTimeMillis();

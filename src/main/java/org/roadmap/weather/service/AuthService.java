@@ -13,9 +13,8 @@ import org.roadmap.weather.exception.user.InvalidUserParamsException;
 import org.roadmap.weather.exception.user.PasswordsDoNotMatchException;
 import org.roadmap.weather.mapper.UserMapper;
 import org.roadmap.weather.repository.AuthRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -57,6 +56,7 @@ public class AuthService {
         throw new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS);
     }
 
+    @Cacheable(cacheNames = "users", key = "#id")
     public UserDto getById(Integer id) {
         return authRepository.findById(id)
                 .map(userMapper::toDto)

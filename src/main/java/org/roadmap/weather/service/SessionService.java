@@ -6,6 +6,8 @@ import org.roadmap.weather.entity.SessionEntity;
 import org.roadmap.weather.mapper.SessionMapper;
 import org.roadmap.weather.repository.SessionRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -37,36 +39,30 @@ public class SessionService {
         return sessionMapper.toDto(session);
     }
 
-    public boolean isSessionValid(String sessionId) {
-        // valid = exists in DB and not expired
-        Optional<SessionEntity> session = sessionRepository.findById(sessionId);
-        if (session.isPresent()) {
-            if (!isExpired(session.get())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Loggable
+    @CacheEvict(cacheNames = "sessions", allEntries = true)
     public void deleteExpiredSessions() {
         sessionRepository.deleteExpiredSessions();
     }
 
+    @CacheEvict(cacheNames = "sessions", key = "#sessionId")
     public void deleteSession(String sessionId) {
         sessionRepository.deleteById(sessionId);
     }
 
-    private boolean isExpired(SessionEntity session) {
-        return session.getExpiresAt().before(new Timestamp(System.currentTimeMillis()));
-    }
-
+    @Cacheable(cacheNames = "sessions", key = "#sessionId")
     public Optional<SessionDto> getSession(String sessionId) {
         Optional<SessionEntity> session = sessionRepository.findById(sessionId);
         if (session.isPresent()) {
             SessionEntity foundSession = session.get();
-            return Optional.of(sessionMapper.toDto(foundSession));
+            if (!isExpired(foundSession)) {
+                return Optional.of(sessionMapper.toDto(foundSession));
+            }
         }
         return Optional.empty();
+    }
+
+    private boolean isExpired(SessionEntity session) {
+        return session.getExpiresAt().before(new Timestamp(System.currentTimeMillis()));
     }
 }

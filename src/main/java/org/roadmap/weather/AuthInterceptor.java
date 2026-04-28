@@ -30,7 +30,6 @@ public class AuthInterceptor implements HandlerInterceptor {
     ) {
         Optional<String> sessionId = extractSessionId(request);
         if (sessionId.isPresent()) {
-            if (sessionService.isSessionValid(sessionId.get())) {
                 Optional<SessionDto> session = sessionService.getSession(sessionId.get());
                 if (session.isPresent()) {
                     SessionDto currentSession = session.get();
@@ -38,7 +37,6 @@ public class AuthInterceptor implements HandlerInterceptor {
                     request.setAttribute("user", user);
                     request.setAttribute("sessionId", currentSession.id());
                 }
-            }
         }
         return true;
     }

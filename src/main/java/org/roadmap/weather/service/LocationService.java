@@ -6,13 +6,14 @@ import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.dto.response.LocationResponseDto;
 import org.roadmap.weather.entity.Location;
-import org.roadmap.weather.entity.User;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.mapper.LocationMapper;
 import org.roadmap.weather.repository.LocationRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +46,7 @@ public class LocationService {
     }
 
     @Loggable
+    @CacheEvict(cacheNames = "locations", key = "#user.id()")
     public void add(String name, String latitude, String longitude, UserDto user) {
         locationRepository.save(
                 new Location(
@@ -84,6 +86,7 @@ public class LocationService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "locations", key = "#userId")
     public void delete(String locationId, Integer userId) {
         try {
             Integer id = Integer.valueOf(locationId);
@@ -97,5 +100,10 @@ public class LocationService {
         } catch (NumberFormatException ex) {
             throw new ValidationException(ExceptionMessages.LOCATION_NOT_FOUND_FOR_USER);
         }
+    }
+
+    @Cacheable(cacheNames = "locations", key = "#userId")
+    public List<Location> findByUserId(Integer userId) {
+        return locationRepository.findByUserId(userId);
     }
 }
