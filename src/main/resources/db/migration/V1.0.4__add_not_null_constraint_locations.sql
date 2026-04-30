@@ -1,0 +1,5 @@
+ALTER TABLE IF EXISTS locations
+    ALTER COLUMN latitude SET NOT NULL;
+
+ALTER TABLE IF EXISTS locations
+    ALTER COLUMN longitude SET NOT NULL;

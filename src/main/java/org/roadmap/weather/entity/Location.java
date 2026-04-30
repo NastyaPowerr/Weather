@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 
@@ -29,7 +30,10 @@ public class Location {
     @Column(name = "user_id", nullable = false)
     private Integer userId;
 
+    @Column(name = "latitude", nullable = false)
     private BigDecimal latitude;
+
+    @Column(name = "longitude", nullable = false)
     private BigDecimal longitude;
 
     public Location(String name, Integer userId, BigDecimal latitude, BigDecimal longitude) {

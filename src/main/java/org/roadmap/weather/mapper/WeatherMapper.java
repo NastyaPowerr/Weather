@@ -23,7 +23,14 @@ public interface WeatherMapper {
 
     @BeforeMapping
     default void validateInputs(Location location, WeatherResponseDto responseDto) {
-        if (responseDto == null || responseDto.main() == null || responseDto.weather() == null) {
+        if (responseDto == null ||
+                responseDto.main() == null ||
+                responseDto.weather() == null ||
+                responseDto.main().temp() == null ||
+                responseDto.main().feels_like() == null ||
+                responseDto.main().humidity() == null ||
+                responseDto.weather().get(0).description() == null
+        ) {
             throw new ExternalApiParseException(
                     String.format(
                             ExceptionMessages.MISSING_DATA_FROM_RESPONSE,
