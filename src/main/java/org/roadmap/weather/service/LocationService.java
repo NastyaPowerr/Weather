@@ -111,4 +111,11 @@ public class LocationService {
     public List<Location> findByUserId(Integer userId) {
         return locationRepository.findByUserId(userId);
     }
+
+    public boolean isValid(Location location) {
+        if (location == null || location.getName() == null || location.getLatitude() == null || location.getLongitude() == null) {
+            return false;
+        }
+        return true;
+    }
 }

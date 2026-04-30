@@ -42,24 +42,26 @@ public class WeatherService {
         return getWeathersForLocations(locations);
     }
 
-    private List<Weather> getWeathersForLocations(List<Location> locations) {
+    public List<Weather> getWeathersForLocations(List<Location> locations) {
         List<Weather> weathers = new ArrayList<>();
 
         long start = System.currentTimeMillis();
         log.info("Starting: external API call - searching weather for locations...");
 
         for (Location location : locations) {
-            String url = constructUrl(location);
-            try {
-                WeatherResponseDto response = restTemplate.getForObject(url, WeatherResponseDto.class);
+            if (locationService.isValid(location)) {
+                String url = constructUrl(location);
                 try {
-                    weathers.add(weatherMapper.toWeather(location, response));
-                } catch (ExternalApiParseException ex) {
-                    log.warn("Couldn't map weather response for location={}", location.getId());
+                    WeatherResponseDto response = restTemplate.getForObject(url, WeatherResponseDto.class);
+                    try {
+                        weathers.add(weatherMapper.toWeather(location, response));
+                    } catch (ExternalApiParseException ex) {
+                        log.warn("Couldn't map weather response for location={}", location.getId());
+                    }
+                } catch (RestClientException ex) {
+                    log.warn("External API call 'searching weather for locations' was not finished. {}", ex.getMessage());
+                    throw new GeocodingApiCallException(ex.getMessage());
                 }
-            } catch (RestClientException ex) {
-                log.warn("External API call 'searching weather for locations' was not finished. {}", ex.getMessage());
-                throw new GeocodingApiCallException(ex.getMessage());
             }
         }
         long difference = System.currentTimeMillis() - start;
