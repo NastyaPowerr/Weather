@@ -8,6 +8,7 @@ import org.roadmap.weather.dto.response.LocationResponseDto;
 import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
+import org.roadmap.weather.exception.ExternalApiParseException;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.mapper.LocationMapper;
 import org.roadmap.weather.repository.LocationRepository;
@@ -73,7 +74,11 @@ public class LocationService {
 
             if (response != null) {
                 for (LocationResponseDto location : response) {
-                    locations.add(locationMapper.toDto(location));
+                    try {
+                        locations.add(locationMapper.toDto(location));
+                    } catch (ExternalApiParseException ex) {
+                        log.warn("Couldn't map location response for name={}", locationName);
+                    }
                 }
             }
             long difference = System.currentTimeMillis() - start;

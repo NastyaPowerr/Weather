@@ -4,10 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.dto.Weather;
 import org.roadmap.weather.dto.response.WeatherResponseDto;
 import org.roadmap.weather.entity.Location;
-import org.roadmap.weather.exception.WeatherParseException;
+import org.roadmap.weather.exception.ExternalApiParseException;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.mapper.WeatherMapper;
-import org.roadmap.weather.repository.LocationRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -40,6 +39,10 @@ public class WeatherService {
 
     public List<Weather> getWeathersForUser(Integer userId) {
         List<Location> locations = locationService.findByUserId(userId);
+        return getWeathersForLocations(locations);
+    }
+
+    private List<Weather> getWeathersForLocations(List<Location> locations) {
         List<Weather> weathers = new ArrayList<>();
 
         long start = System.currentTimeMillis();
@@ -51,7 +54,7 @@ public class WeatherService {
                 WeatherResponseDto response = restTemplate.getForObject(url, WeatherResponseDto.class);
                 try {
                     weathers.add(weatherMapper.toWeather(location, response));
-                } catch (WeatherParseException ex) {
+                } catch (ExternalApiParseException ex) {
                     log.warn("Couldn't map weather response for location={}", location.getId());
                 }
             } catch (RestClientException ex) {

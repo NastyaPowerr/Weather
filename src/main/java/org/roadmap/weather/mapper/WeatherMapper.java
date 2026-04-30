@@ -9,7 +9,7 @@ import org.roadmap.weather.dto.Weather;
 import org.roadmap.weather.dto.response.WeatherResponseDto;
 import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
-import org.roadmap.weather.exception.WeatherParseException;
+import org.roadmap.weather.exception.ExternalApiParseException;
 
 @Mapper(componentModel = "spring")
 public interface WeatherMapper {
@@ -24,7 +24,12 @@ public interface WeatherMapper {
     @BeforeMapping
     default void validateInputs(Location location, WeatherResponseDto responseDto) {
         if (responseDto == null || responseDto.main() == null || responseDto.weather() == null) {
-            throw new WeatherParseException(ExceptionMessages.MISSING_DATA_FROM_RESPONSE);
+            throw new ExternalApiParseException(
+                    String.format(
+                            ExceptionMessages.MISSING_DATA_FROM_RESPONSE,
+                            "weather"
+                    )
+            );
         }
     }
 
