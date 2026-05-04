@@ -2,6 +2,8 @@ package org.roadmap.weather;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.stream.Collectors;
 
 @ControllerAdvice(annotations = Controller.class)
 @Slf4j
@@ -59,6 +63,27 @@ public class GlobalExceptionHandler {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         String uri = request.getRequestURI();
         log.debug("User could not {}. {}", uri, error);
+        if (uri.contains("sign-in")) {
+            return "sign-in";
+        }
+        if (uri.contains("sign-up")) {
+            return "sign-up";
+        }
+        return "error";
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public String handleConstraintViolation(ConstraintViolationException ex, HttpServletResponse response, Model model, HttpServletRequest request) {
+        String error = ex
+                .getConstraintViolations()
+                .stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining(", "));
+        log.warn("Constraint violation without controller: {}", error);
+        model.addAttribute("error", "Please check your input.");
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+
+        String uri = request.getRequestURI();
         if (uri.contains("sign-in")) {
             return "sign-in";
         }

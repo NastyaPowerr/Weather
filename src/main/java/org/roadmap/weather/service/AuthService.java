@@ -1,6 +1,7 @@
 package org.roadmap.weather.service;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import jakarta.validation.Valid;
 import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
@@ -15,8 +16,10 @@ import org.roadmap.weather.mapper.UserMapper;
 import org.roadmap.weather.repository.AuthRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
+@Validated
 public class AuthService {
     private final SessionService sessionService;
     private final AuthRepository authRepository;
@@ -33,7 +36,7 @@ public class AuthService {
     }
 
     @Loggable
-    public void register(UserRegisterDto userDto) {
+    public void register(@Valid UserRegisterDto userDto) {
         if (!userDto.password().equals(userDto.repeatedPassword())) {
             throw new PasswordsDoNotMatchException(ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
         }
