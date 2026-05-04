@@ -8,18 +8,15 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.client.RestTemplate;
 
-import static org.mockito.Mockito.mock;
-
 @Configuration
-@ComponentScan("org.roadmap.weather.service")
-@ComponentScan("org.roadmap.weather.repository")
-@ComponentScan("org.roadmap.weather.mapper")
-@PropertySource("classpath:application-test.properties")
-@Import(DatabaseConfig.class)
-public class TestConfig {
+@PropertySource("classpath:application.properties")
+@PropertySource("classpath:application-${spring.profiles.active}.properties")
+@ComponentScan("org.roadmap.weather")
+@Import({DatabaseConfig.class, CacheConfig.class, WebConfig.class})
+public class AppConfig {
     @Bean
     public RestTemplate restTemplate() {
-        return mock(RestTemplate.class);
+        return new RestTemplate();
     }
 
     @Bean

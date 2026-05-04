@@ -8,6 +8,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -21,10 +22,7 @@ import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
-@PropertySource("classpath:application.properties")
-@PropertySource("classpath:application-${spring.profiles.active}.properties")
 @EnableTransactionManagement
-@EnableCaching
 public class DatabaseConfig {
     private final Environment env;
 
@@ -52,6 +50,10 @@ public class DatabaseConfig {
         properties.setProperty("hibernate.hbm2ddl.auto", "validate");
         properties.setProperty("hibernate.show_sql", "true");
         properties.setProperty("hibernate.format_sql", "true");
+
+        String schema = env.getProperty("db.schema");
+        properties.setProperty("hibernate.default_schema", schema);
+
         sessionFactory.setHibernateProperties(properties);
         return sessionFactory;
     }
@@ -65,11 +67,12 @@ public class DatabaseConfig {
 
     @Bean(initMethod = "migrate")
     public Flyway flyway(DataSource dataSource) {
+        String schema = env.getProperty("db.schema");
         return Flyway.configure()
                 .dataSource(dataSource)
                 .locations("db/migration")
-                .schemas("weather")
-                .defaultSchema("weather")
+                .schemas(schema)
+                .defaultSchema(schema)
                 .baselineOnMigrate(true)
                 .load();
     }
@@ -77,10 +80,5 @@ public class DatabaseConfig {
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
-    }
-
-    @Bean
-    public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager();
     }
 }
