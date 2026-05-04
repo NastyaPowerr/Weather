@@ -37,17 +37,17 @@ public class SessionRepositoryImpl implements SessionRepository {
     }
 
     @Override
-    public Optional<SessionEntity> findById(String id) {
+    public Optional<SessionEntity> findById(UUID id) {
         Session session = sessionFactory.getCurrentSession();
-        SessionEntity sessionEntity = session.find(SessionEntity.class, UUID.fromString(id));
+        SessionEntity sessionEntity = session.find(SessionEntity.class, id);
         return Optional.ofNullable(sessionEntity);
     }
 
     @Override
-    public void deleteById(String id) {
+    public void deleteById(UUID id) {
         Session session = sessionFactory.getCurrentSession();
         session.createMutationQuery(DELETE_BY_ID_HQL)
-                .setParameter("id", UUID.fromString(id))
+                .setParameter("id", id)
                 .executeUpdate();
     }
 

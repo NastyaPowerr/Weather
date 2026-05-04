@@ -18,6 +18,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.UUID;
+
 @Service
 @Validated
 public class AuthService {
@@ -67,7 +69,7 @@ public class AuthService {
     }
 
     @Loggable
-    public void logout(String sessionId) {
+    public void logout(UUID sessionId) {
         sessionService.deleteSession(sessionId);
     }
 

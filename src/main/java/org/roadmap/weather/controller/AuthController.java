@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.UUID;
+
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
@@ -47,8 +49,7 @@ public class AuthController {
             HttpServletResponse response
     ) {
         SessionDto session = authService.authorize(user);
-        String sessionId = String.valueOf(session.id());
-        Cookie cookie = cookieService.create(sessionId);
+        Cookie cookie = cookieService.create(session.id());
         response.addCookie(cookie);
         response.setStatus(HttpServletResponse.SC_OK);
         return "redirect:/";
@@ -56,7 +57,7 @@ public class AuthController {
 
     @PostMapping("/sign-out")
     public String logout(
-            @RequestAttribute(name = "sessionId", required = false) String sessionId,
+            @RequestAttribute(name = "sessionId", required = false) UUID sessionId,
             HttpServletResponse response
     ) {
         // проверка, чтобы уменьшить кол-во вызовов к БД

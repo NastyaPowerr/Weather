@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
@@ -28,15 +29,16 @@ public class AuthInterceptor implements HandlerInterceptor {
             HttpServletResponse response,
             Object handler
     ) {
-        Optional<String> sessionId = extractSessionId(request);
-        if (sessionId.isPresent()) {
-                Optional<SessionDto> session = sessionService.getSession(sessionId.get());
-                if (session.isPresent()) {
-                    SessionDto currentSession = session.get();
-                    UserDto user = authService.getById(currentSession.userId());
-                    request.setAttribute("user", user);
-                    request.setAttribute("sessionId", currentSession.id());
-                }
+        Optional<String> sessionIdOpt = extractSessionId(request);
+        if (sessionIdOpt.isPresent()) {
+            UUID sessionId = UUID.fromString(sessionIdOpt.get());
+            Optional<SessionDto> session = sessionService.getSession(sessionId);
+            if (session.isPresent()) {
+                SessionDto currentSession = session.get();
+                UserDto user = authService.getById(currentSession.userId());
+                request.setAttribute("user", user);
+                request.setAttribute("sessionId", sessionId);
+            }
         }
         return true;
     }

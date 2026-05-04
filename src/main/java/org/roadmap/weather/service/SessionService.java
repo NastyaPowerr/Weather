@@ -46,12 +46,12 @@ public class SessionService {
     }
 
     @CacheEvict(cacheNames = "sessions", key = "#sessionId")
-    public void deleteSession(String sessionId) {
+    public void deleteSession(UUID sessionId) {
         sessionRepository.deleteById(sessionId);
     }
 
     @Cacheable(cacheNames = "sessions", key = "#sessionId")
-    public Optional<SessionDto> getSession(String sessionId) {
+    public Optional<SessionDto> getSession(UUID sessionId) {
         Optional<SessionEntity> session = sessionRepository.findById(sessionId);
         if (session.isPresent()) {
             SessionEntity foundSession = session.get();

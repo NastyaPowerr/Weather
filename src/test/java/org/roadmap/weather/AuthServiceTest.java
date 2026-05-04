@@ -132,7 +132,7 @@ public class AuthServiceTest {
         UserLoginDto loginUser = new UserLoginDto("login", "password");
         SessionDto session = authService.authorize(loginUser);
 
-        Optional<SessionDto> savedSession = sessionService.getSession(String.valueOf(session.id()));
+        Optional<SessionDto> savedSession = sessionService.getSession(session.id());
         Assertions.assertNotNull(session.id());
         Assertions.assertTrue(savedSession.isPresent());
     }
@@ -159,14 +159,14 @@ public class AuthServiceTest {
 
         UserLoginDto loginUser = new UserLoginDto("login", "password");
         SessionDto session = authService.authorize(loginUser);
-        Optional<SessionDto> savedSession = sessionService.getSession(String.valueOf(session.id()));
+        Optional<SessionDto> savedSession = sessionService.getSession(session.id());
 
         Assertions.assertNotNull(session.id());
         Assertions.assertTrue(savedSession.isPresent());
 
-        authService.logout(String.valueOf(session.id()));
+        authService.logout(session.id());
         sessionFactory.getCurrentSession().clear();
-        Optional<SessionDto> deletedSession = sessionService.getSession(String.valueOf(session.id()));
+        Optional<SessionDto> deletedSession = sessionService.getSession(session.id());
 
         Assertions.assertFalse(deletedSession.isPresent());
     }
@@ -179,12 +179,12 @@ public class AuthServiceTest {
         UserLoginDto loginUser = new UserLoginDto("login", "password");
         SessionDto session = authService.authorize(loginUser);
 
-        Optional<SessionDto> savedSession = sessionService.getSession(String.valueOf(session.id()));
+        Optional<SessionDto> savedSession = sessionService.getSession(session.id());
         Assertions.assertNotNull(session.id());
         Assertions.assertTrue(savedSession.isPresent());
 
         Thread.sleep(sessionDuration + 1);
-        Optional<SessionDto> expiredSession = sessionService.getSession(String.valueOf(session.id()));
+        Optional<SessionDto> expiredSession = sessionService.getSession(session.id());
 
         Assertions.assertNotNull(session.id());
         Assertions.assertFalse(expiredSession.isPresent());
