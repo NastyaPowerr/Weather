@@ -8,6 +8,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import static org.mockito.Mockito.mock;
 
 @Configuration
@@ -25,5 +28,10 @@ public class TestConfig {
     @Bean
     public MethodValidationPostProcessor methodValidationPostProcessor() {
         return new MethodValidationPostProcessor();
+    }
+
+    @Bean(destroyMethod = "shutdown")
+    public ExecutorService weatherApiExecutor() {
+        return Executors.newFixedThreadPool(4);
     }
 }

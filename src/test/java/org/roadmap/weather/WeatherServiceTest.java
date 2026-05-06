@@ -7,7 +7,7 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.roadmap.weather.config.TestConfig;
 import org.roadmap.weather.dto.Weather;
 import org.roadmap.weather.dto.response.WeatherResponseDto;
 import org.roadmap.weather.entity.Location;
@@ -15,7 +15,11 @@ import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.mapper.WeatherMapper;
 import org.roadmap.weather.service.LocationService;
 import org.roadmap.weather.service.WeatherService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -23,23 +27,20 @@ import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = TestConfig.class)
 public class WeatherServiceTest {
-    @Mock
+    @MockitoBean
     private RestTemplate restTemplate;
 
-    @Mock
+    @MockitoBean
     private LocationService locationService;
 
-    @Spy
-    private WeatherMapper weatherMapper = Mappers.getMapper(WeatherMapper.class);
-
-    @InjectMocks
+    @Autowired
     private WeatherService weatherService;
 
     @Test
@@ -61,9 +62,6 @@ public class WeatherServiceTest {
         );
 
         List<Location> locations = List.of(location);
-        when(locationService
-                .isValid(location))
-                .thenReturn(true);
         when(restTemplate
                 .getForObject(anyString(), eq(WeatherResponseDto.class)))
                 .thenReturn(response);
@@ -108,12 +106,7 @@ public class WeatherServiceTest {
         );
 
         List<Location> locations = List.of(firstLocation, secondLocation);
-        when(locationService
-                .isValid(firstLocation))
-                .thenReturn(true);
-        when(locationService
-                .isValid(secondLocation))
-                .thenReturn(true);
+
         when(restTemplate
                 .getForObject(anyString(), eq(WeatherResponseDto.class)))
                 .thenReturn(firstResponse, secondResponse);
@@ -176,48 +169,22 @@ public class WeatherServiceTest {
                 List.of(new WeatherResponseDto.Weather(null))
         );
 
-        when(locationService
-                .isValid(location))
-                .thenReturn(true);
+        WeatherResponseDto validResponse = new WeatherResponseDto(
+                new WeatherResponseDto.Main(
+                        new BigDecimal("6.0"),
+                        new BigDecimal("2.3"),
+                        new BigDecimal("85")
+                ),
+                List.of(new WeatherResponseDto.Weather("rainy"))
+        );
 
-        List<Location> locations = List.of(location, location, location, location);
+        List<Location> locations = List.of(location, location, location, location, location);
         when(restTemplate.getForObject(anyString(), eq(WeatherResponseDto.class)))
-                .thenReturn(firstResponse, secondResponse, thirdResponse, fourthResponse);
+                .thenReturn(firstResponse, secondResponse, thirdResponse, fourthResponse, validResponse);
         List<Weather> weathers = weatherService.getWeathersForLocations(locations);
 
-        Assertions.assertEquals(0, weathers.size());
+        Assertions.assertEquals(1, weathers.size());
     }
-
-    @Test
-    void givenInvalidLocations_whenGetWeathers_thenSkipLocation() {
-        Location firstLocation = new Location(
-                null,
-                1,
-                new BigDecimal("55.7504461"),
-                new BigDecimal("37.6174943")
-        );
-        Location secondLocation = new Location(
-                "Moscow",
-                1,
-                null,
-                new BigDecimal("37.6174943")
-        );
-        Location thirdLocation = new Location(
-                "Moscow",
-                1,
-                new BigDecimal("55.7504461"),
-                null
-        );
-
-        when(locationService
-                .isValid(any(Location.class)))
-                .thenReturn(false);
-
-        List<Location> locations = List.of(firstLocation, secondLocation, thirdLocation);
-        List<Weather> weathers = weatherService.getWeathersForLocations(locations);
-        Assertions.assertEquals(0, weathers.size());
-    }
-
 
     @Test
     void givenLocation_whenApiReturnsBadRequest_thenThrowException() {
@@ -229,15 +196,14 @@ public class WeatherServiceTest {
         );
         List<Location> locations = List.of(location);
 
-        when(locationService
-                .isValid(location))
-                .thenReturn(true);
-
         when(restTemplate
                 .getForObject(anyString(), eq(WeatherResponseDto.class)))
                 .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
-        Assertions.assertThrows(GeocodingApiCallException.class, () -> weatherService.getWeathersForLocations(locations));
+        Assertions.assertThrows(
+                GeocodingApiCallException.class,
+                () -> weatherService.getWeathersForLocations(locations)
+        );
     }
 
     @Test
@@ -250,15 +216,14 @@ public class WeatherServiceTest {
         );
         List<Location> locations = List.of(location);
 
-        when(locationService
-                .isValid(location))
-                .thenReturn(true);
-
         when(restTemplate
                 .getForObject(anyString(), eq(WeatherResponseDto.class)))
                 .thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
 
-        Assertions.assertThrows(GeocodingApiCallException.class, () -> weatherService.getWeathersForLocations(locations));
+        Assertions.assertThrows(
+                GeocodingApiCallException.class,
+                () -> weatherService.getWeathersForLocations(locations)
+        );
     }
 
     @Test
@@ -271,15 +236,14 @@ public class WeatherServiceTest {
         );
         List<Location> locations = List.of(location);
 
-        when(locationService
-                .isValid(location))
-                .thenReturn(true);
-
         when(restTemplate
                 .getForObject(anyString(), eq(WeatherResponseDto.class)))
                 .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
-        Assertions.assertThrows(GeocodingApiCallException.class, () -> weatherService.getWeathersForLocations(locations));
+        Assertions.assertThrows(
+                GeocodingApiCallException.class,
+                () -> weatherService.getWeathersForLocations(locations)
+        );
     }
 
     @Test
@@ -292,15 +256,14 @@ public class WeatherServiceTest {
         );
         List<Location> locations = List.of(location);
 
-        when(locationService
-                .isValid(location))
-                .thenReturn(true);
-
         when(restTemplate
                 .getForObject(anyString(), eq(WeatherResponseDto.class)))
                 .thenThrow(new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS));
 
-        Assertions.assertThrows(GeocodingApiCallException.class, () -> weatherService.getWeathersForLocations(locations));
+        Assertions.assertThrows(
+                GeocodingApiCallException.class,
+                () -> weatherService.getWeathersForLocations(locations)
+        );
     }
 
     @Test
@@ -313,14 +276,13 @@ public class WeatherServiceTest {
         );
         List<Location> locations = List.of(location);
 
-        when(locationService
-                .isValid(location))
-                .thenReturn(true);
-
         when(restTemplate
                 .getForObject(anyString(), eq(WeatherResponseDto.class)))
                 .thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
-        Assertions.assertThrows(GeocodingApiCallException.class, () -> weatherService.getWeathersForLocations(locations));
+        Assertions.assertThrows(
+                GeocodingApiCallException.class,
+                () -> weatherService.getWeathersForLocations(locations)
+        );
     }
 }

@@ -82,7 +82,11 @@ public class LocationService {
                 }
             }
             long difference = System.currentTimeMillis() - start;
-            log.info("Finished: external API call - searching for locations. Found {} in {}ms", locations.size(), difference);
+            log.info(
+                    "Finished: external API call - searching for locations. Found {} in {}ms",
+                    locations.size(),
+                    difference
+            );
             return locations;
         } catch (RestClientException ex) {
             log.warn("External API call 'searching for locations' was not finished. {}", ex.getMessage());
@@ -110,12 +114,5 @@ public class LocationService {
     @Cacheable(cacheNames = "locations", key = "#userId")
     public List<Location> findByUserId(Integer userId) {
         return locationRepository.findByUserId(userId);
-    }
-
-    public boolean isValid(Location location) {
-        if (location == null || location.getName() == null || location.getLatitude() == null || location.getLongitude() == null) {
-            return false;
-        }
-        return true;
     }
 }
