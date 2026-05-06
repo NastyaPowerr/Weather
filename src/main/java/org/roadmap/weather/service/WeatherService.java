@@ -85,11 +85,12 @@ public class WeatherService {
 
     private String createUrl(Location location) {
         return String.format(
-                "https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=%s",
+                "https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=%s&lang=%s",
                 location.getLatitude(),
                 location.getLongitude(),
                 apiKey,
-                "metric"
+                "metric",
+                "ru"
         );
     }
 }

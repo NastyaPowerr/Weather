@@ -60,10 +60,11 @@ public class LocationService {
 
     public List<LocationDto> findByName(String locationName) {
         String url = String.format(
-                "https://api.openweathermap.org/geo/1.0/direct?q=%s&limit=%s&appid=%s",
+                "https://api.openweathermap.org/geo/1.0/direct?q=%s&limit=%s&appid=%s&lang=%s",
                 locationName,
                 10,
-                apiKey
+                apiKey,
+                "ru"
         );
         try {
             long start = System.currentTimeMillis();

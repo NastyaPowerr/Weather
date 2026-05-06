@@ -20,7 +20,9 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -40,12 +42,16 @@ public class LocationServiceTest {
     @Spy
     private LocationMapper locationMapper = Mappers.getMapper(LocationMapper.class);
 
+    private final Map<String, String> localNames = new HashMap<>();
+
     @Test
     void givenFindByName_whenApiReturnsValidResponse_thenReturnLocations() {
         LocationResponseDto response = new LocationResponseDto(
                 "Moscow",
                 new BigDecimal("55.7504461"),
-                new BigDecimal("37.6174943")
+                new BigDecimal("37.6174943"),
+                localNames
+
         );
 
         when(restTemplate.getForObject(anyString(), eq(LocationResponseDto[].class)))
@@ -64,13 +70,15 @@ public class LocationServiceTest {
         LocationResponseDto firstMoscow = new LocationResponseDto(
                 "Moscow",
                 new BigDecimal("55.7504461"),
-                new BigDecimal("37.6174943")
+                new BigDecimal("37.6174943"),
+                localNames
         );
 
         LocationResponseDto secondMoscow = new LocationResponseDto(
                 "Moscow",
                 new BigDecimal("46.7323875"),
-                new BigDecimal("-117.0001651")
+                new BigDecimal("-117.0001651"),
+                localNames
         );
 
         when(restTemplate.getForObject(anyString(), eq(LocationResponseDto[].class)))
@@ -115,19 +123,22 @@ public class LocationServiceTest {
         LocationResponseDto responseWithEmptyName = new LocationResponseDto(
                 null,
                 new BigDecimal("55.7504461"),
-                new BigDecimal("37.6174943")
+                new BigDecimal("37.6174943"),
+                localNames
         );
 
         LocationResponseDto responseWithEmptyLatitude = new LocationResponseDto(
                 "Moscow",
                 null,
-                new BigDecimal("37.6174943")
+                new BigDecimal("37.6174943"),
+                localNames
         );
 
         LocationResponseDto responseWithEmptyLongitude = new LocationResponseDto(
                 "Moscow",
                 new BigDecimal("55.7504461"),
-                null
+                null,
+                localNames
         );
 
         when(restTemplate.getForObject(anyString(), eq(LocationResponseDto[].class)))

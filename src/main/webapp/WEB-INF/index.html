@@ -63,10 +63,10 @@
                                 <h1 class="card-text" th:text="${weather.temp().toString()} + '°C'"></h1>
                                 <h3 class="card-title" th:text="${weather.name()}"></h3>
                                 <p class="card-text mb-1">
-                                    Feels like <span th:text="${weather.tempFeelsLike().toString()} + '°C'"></span>
-                                    <span th:text="${weather.clouds()}"></span>
+                                    Ощущается как <span th:text="${weather.tempFeelsLike().toString()} + '°C,'"></span>
                                 </p>
-                                <p class="card-text mb-1"> Humidity: <span
+                                <p class="card-text mb-1" th:text="${weather.clouds()} + '.'"></p>
+                                <p class="card-text mb-1"> Влажность: <span
                                         th:text="${weather.humidity()} + '%'"> </span>
                                 </p>
                             </div>
