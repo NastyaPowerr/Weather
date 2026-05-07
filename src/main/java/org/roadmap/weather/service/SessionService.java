@@ -30,9 +30,7 @@ public class SessionService {
     @Loggable
     public SessionDto create(Integer userId) {
         UUID sessionId = UUID.randomUUID();
-
         Timestamp expiredAt = new Timestamp(System.currentTimeMillis() + sessionDuration);
-
         SessionEntity session = new SessionEntity(sessionId, userId, expiredAt);
 
         sessionRepository.save(session);
@@ -55,14 +53,10 @@ public class SessionService {
         Optional<SessionEntity> session = sessionRepository.findById(sessionId);
         if (session.isPresent()) {
             SessionEntity foundSession = session.get();
-            if (!isExpired(foundSession)) {
+            if (!foundSession.isExpired()) {
                 return Optional.of(sessionMapper.toDto(foundSession));
             }
         }
         return Optional.empty();
-    }
-
-    private boolean isExpired(SessionEntity session) {
-        return session.getExpiresAt().before(new Timestamp(System.currentTimeMillis()));
     }
 }

@@ -53,7 +53,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public String handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletResponse response, Model model, HttpServletRequest request) {
+    public String handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpServletResponse response,
+            Model model,
+            HttpServletRequest request
+    ) {
         String error = ex
                 .getBindingResult()
                 .getAllErrors()
@@ -73,7 +78,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public String handleConstraintViolation(ConstraintViolationException ex, HttpServletResponse response, Model model, HttpServletRequest request) {
+    public String handleConstraintViolation(
+            ConstraintViolationException ex,
+            HttpServletResponse response,
+            Model model,
+            HttpServletRequest request
+    ) {
         String error = ex
                 .getConstraintViolations()
                 .stream()
@@ -94,10 +104,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(GeocodingApiCallException.class)
-    public String handleGeocodingApiCall(GeocodingApiCallException ex, HttpServletResponse response) {
+    public String handleGeocodingApiCall(GeocodingApiCallException ex, HttpServletResponse response, Model model) {
         log.warn("External Api error - Geocoding Api call failed: ", ex);
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        return "error";
+        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        model.addAttribute("error", "Weather service temporarily unavailable. Please try again later.");
+        return "index";
     }
 
     @ExceptionHandler(Exception.class)

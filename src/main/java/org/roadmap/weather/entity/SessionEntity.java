@@ -28,4 +28,8 @@ public class SessionEntity {
 
     @Column(name = "expires_at", nullable = false)
     private Timestamp expiresAt;
+
+    public boolean isExpired() {
+        return this.getExpiresAt().before(new Timestamp(System.currentTimeMillis()));
+    }
 }

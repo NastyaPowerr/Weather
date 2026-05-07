@@ -49,13 +49,13 @@ public class LocationService {
 
     @Loggable
     @CacheEvict(cacheNames = "locations", key = "#user.id()")
-    public void add(String name, String latitude, String longitude, UserDto user) {
+    public void add(LocationDto locationDto, UserDto user) {
         locationRepository.save(
                 new Location(
-                        name,
+                        locationDto.name(),
                         user.id(),
-                        new BigDecimal(latitude),
-                        new BigDecimal(longitude)
+                        locationDto.latitude(),
+                        locationDto.longitude()
                 ));
     }
 

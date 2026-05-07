@@ -9,6 +9,7 @@ import org.roadmap.weather.service.LocationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,9 +44,7 @@ public class LocationController {
 
     @PostMapping("/locations")
     public String addLocation(
-            @RequestParam String name,
-            @RequestParam String latitude,
-            @RequestParam String longitude,
+            @ModelAttribute LocationDto location,
             @RequestAttribute(name = "user", required = false) UserDto user,
             HttpServletResponse response,
             Model model
@@ -55,7 +54,7 @@ public class LocationController {
             model.addAttribute("error", ExceptionMessages.REQUIRE_AUTHORIZATION);
             return "redirect:/auth/sign-in";
         }
-        locationService.add(name, latitude, longitude, user);
+        locationService.add(location, user);
         return "redirect:/";
     }
 
