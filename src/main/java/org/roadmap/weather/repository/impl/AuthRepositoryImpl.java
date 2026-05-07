@@ -30,7 +30,6 @@ public class AuthRepositoryImpl implements AuthRepository {
         Session session = sessionFactory.getCurrentSession();
         try {
             session.persist(user);
-            session.flush();
         } catch (ConstraintViolationException ex) {
             throw new UserAlreadyExistsException(ExceptionMessages.USERNAME_TAKEN);
         }

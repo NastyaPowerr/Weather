@@ -35,7 +35,6 @@ public class LocationRepositoryImpl implements LocationRepository {
         Session session = sessionFactory.getCurrentSession();
         try {
             session.persist(location);
-            session.flush();
         } catch (ConstraintViolationException ex) {
             throw new LocationAlreadyExistsForUserException(ExceptionMessages.LOCATION_CONFLICT_FOR_USER);
         }

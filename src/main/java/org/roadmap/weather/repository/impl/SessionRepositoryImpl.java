@@ -33,7 +33,6 @@ public class SessionRepositoryImpl implements SessionRepository {
     public void save(SessionEntity sessionEntity) {
         Session session = sessionFactory.getCurrentSession();
         session.persist(sessionEntity);
-        session.flush();
     }
 
     @Override

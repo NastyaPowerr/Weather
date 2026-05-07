@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public class SessionService {
     }
 
     @Loggable
+    @Transactional
     public SessionDto create(Integer userId) {
         UUID sessionId = UUID.randomUUID();
         Timestamp expiredAt = new Timestamp(System.currentTimeMillis() + sessionDuration);
@@ -37,18 +39,14 @@ public class SessionService {
         return sessionMapper.toDto(session);
     }
 
-    @Loggable
-    @CacheEvict(cacheNames = "sessions", allEntries = true)
-    public void deleteExpiredSessions() {
-        sessionRepository.deleteExpiredSessions();
-    }
-
     @CacheEvict(cacheNames = "sessions", key = "#sessionId")
+    @Transactional
     public void deleteSession(UUID sessionId) {
         sessionRepository.deleteById(sessionId);
     }
 
     @Cacheable(cacheNames = "sessions", key = "#sessionId")
+    @Transactional(readOnly = true)
     public Optional<SessionDto> getSession(UUID sessionId) {
         Optional<SessionEntity> session = sessionRepository.findById(sessionId);
         if (session.isPresent()) {
@@ -58,5 +56,12 @@ public class SessionService {
             }
         }
         return Optional.empty();
+    }
+
+    @Loggable
+    @CacheEvict(cacheNames = "sessions", allEntries = true)
+    @Transactional
+    public void deleteExpiredSessions() {
+        sessionRepository.deleteExpiredSessions();
     }
 }

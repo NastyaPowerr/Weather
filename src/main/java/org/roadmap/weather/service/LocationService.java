@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +48,7 @@ public class LocationService {
 
     @Loggable
     @CacheEvict(cacheNames = "locations", key = "#user.id()")
+    @Transactional
     public void add(LocationDto locationDto, UserDto user) {
         locationRepository.save(
                 new Location(
@@ -60,12 +60,13 @@ public class LocationService {
     }
 
     @Cacheable(cacheNames = "locations", key = "#userId")
+    @Transactional(readOnly = true)
     public List<Location> findByUserId(Integer userId) {
         return locationRepository.findByUserId(userId);
     }
 
-    @Transactional
     @CacheEvict(cacheNames = "locations", key = "#userId")
+    @Transactional
     public void delete(String locationId, Integer userId) {
         try {
             Integer id = Integer.valueOf(locationId);

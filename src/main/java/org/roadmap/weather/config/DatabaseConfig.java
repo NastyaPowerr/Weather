@@ -37,6 +37,14 @@ public class DatabaseConfig {
         config.setJdbcUrl(env.getProperty("db.url"));
         config.setUsername(env.getProperty("db.username"));
         config.setPassword(env.getProperty("db.password"));
+
+        config.setMaximumPoolSize(20);
+        config.setMinimumIdle(5);
+
+        config.setConnectionTimeout(30000);
+        config.setIdleTimeout(600000);
+        config.setMaxLifetime(1800000);
+
         return new HikariDataSource(config);
     }
 
@@ -54,6 +62,9 @@ public class DatabaseConfig {
         String schema = env.getProperty("db.schema");
         properties.setProperty("hibernate.default_schema", schema);
 
+        properties.setProperty("hibernate.jdbc.batch_size", "20");
+        properties.setProperty("hibernate.jdbc.fetch_size", "100");
+        
         sessionFactory.setHibernateProperties(properties);
         return sessionFactory;
     }

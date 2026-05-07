@@ -16,6 +16,7 @@ import org.roadmap.weather.mapper.UserMapper;
 import org.roadmap.weather.repository.AuthRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.UUID;
@@ -38,6 +39,7 @@ public class AuthService {
     }
 
     @Loggable
+    @Transactional
     public void register(@Valid UserRegisterDto userDto) {
         if (!userDto.password().equals(userDto.repeatedPassword())) {
             throw new PasswordsDoNotMatchException(ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
@@ -52,6 +54,7 @@ public class AuthService {
     }
 
     @Loggable
+    @Transactional
     public SessionDto authorize(UserLoginDto userDto) {
         User user = authRepository.findByLogin(userDto.login())
                 .orElseThrow(() -> new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS));
@@ -61,6 +64,7 @@ public class AuthService {
         throw new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS);
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(cacheNames = "users", key = "#id")
     public UserDto getById(Integer id) {
         return authRepository.findById(id)
