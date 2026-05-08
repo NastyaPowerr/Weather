@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.roadmap.weather.dto.request.UserRegisterDto;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.exception.location.LocationAlreadyExistsForUserException;
@@ -23,14 +24,6 @@ import java.util.stream.Collectors;
 @ControllerAdvice(annotations = Controller.class)
 @Slf4j
 public class GlobalExceptionHandler {
-
-    @ExceptionHandler(PasswordsDoNotMatchException.class)
-    public String handlePasswordDoNotMatch(HttpServletResponse response, Model model) {
-        model.addAttribute("error", ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        return "sign-up";
-    }
-
     @ExceptionHandler(UserAlreadyExistsException.class)
     public String handleUserAlreadyExists(HttpServletResponse response, Model model) {
         response.setStatus(HttpServletResponse.SC_CONFLICT);
@@ -72,9 +65,25 @@ public class GlobalExceptionHandler {
             return "sign-in";
         }
         if (uri.contains("sign-up")) {
+            String username = request.getParameter("username");
+            model.addAttribute("username", username);
             return "sign-up";
         }
         return "error";
+    }
+
+    @ExceptionHandler(PasswordsDoNotMatchException.class)
+    public String handlePasswordDoNotMatch(
+            HttpServletResponse response,
+            Model model,
+            HttpServletRequest request
+    ) {
+        String username = request.getParameter("username");
+        model.addAttribute("username", username);
+
+        model.addAttribute("error", ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return "sign-up";
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
