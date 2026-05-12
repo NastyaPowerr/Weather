@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.roadmap.weather.dto.request.UserRegisterDto;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.exception.location.LocationAlreadyExistsForUserException;
@@ -39,10 +38,20 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(LocationAlreadyExistsForUserException.class)
-    public String handleLocationAlreadyExists(RedirectAttributes redirectAttributes, HttpServletRequest request) {
-        redirectAttributes.addFlashAttribute("error", ExceptionMessages.USER_ALREADY_HAS_LOCATION);
+    public String handleLocationAlreadyExists(
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request,
+            Model model,
+            HttpServletResponse response
+    ) {
+        response.setStatus(HttpServletResponse.SC_CONFLICT);
         String referer = request.getHeader("Referer");
-        return "redirect:" + referer;
+        if (referer != null && referer.contains("/search")) {
+            redirectAttributes.addFlashAttribute("error", ExceptionMessages.USER_ALREADY_HAS_LOCATION);
+            return "redirect:" + referer;
+        }
+        model.addAttribute("error", ExceptionMessages.USER_ALREADY_HAS_LOCATION);
+        return "index";
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -52,13 +61,13 @@ public class GlobalExceptionHandler {
             Model model,
             HttpServletRequest request
     ) {
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         String error = ex
                 .getBindingResult()
                 .getAllErrors()
                 .get(0)
                 .getDefaultMessage();
         model.addAttribute("error", error);
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         String uri = request.getRequestURI();
         log.debug("User could not {}. {}", uri, error);
         if (uri.contains("sign-in")) {
@@ -78,11 +87,10 @@ public class GlobalExceptionHandler {
             Model model,
             HttpServletRequest request
     ) {
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         String username = request.getParameter("username");
         model.addAttribute("username", username);
-
         model.addAttribute("error", ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return "sign-up";
     }
 
@@ -115,7 +123,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(GeocodingApiCallException.class)
     public String handleGeocodingApiCall(GeocodingApiCallException ex, HttpServletResponse response, Model model) {
         log.warn("External Api error - Geocoding Api call failed: ", ex);
-        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         model.addAttribute("error", "Weather service temporarily unavailable. Please try again later.");
         return "index";
     }
