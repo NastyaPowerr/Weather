@@ -44,14 +44,10 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
-    public String login(
-            @Valid UserLoginDto user,
-            HttpServletResponse response
-    ) {
+    public String login(@Valid UserLoginDto user, HttpServletResponse response) {
         SessionDto session = authService.authorize(user);
         Cookie cookie = cookieService.create(session.id());
         response.addCookie(cookie);
-        response.setStatus(HttpServletResponse.SC_OK);
         return "redirect:/";
     }
 
@@ -60,7 +56,6 @@ public class AuthController {
             @RequestAttribute(name = "sessionId", required = false) UUID sessionId,
             HttpServletResponse response
     ) {
-        // проверка, чтобы уменьшить кол-во вызовов к БД
         if (sessionId != null) {
             authService.logout(sessionId);
         }

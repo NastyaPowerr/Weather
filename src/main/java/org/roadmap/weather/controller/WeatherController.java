@@ -1,9 +1,7 @@
 package org.roadmap.weather.controller;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.dto.Weather;
-import org.roadmap.weather.entity.User;
 import org.roadmap.weather.service.WeatherService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,11 +21,9 @@ public class WeatherController {
     @GetMapping("/")
     public String getWeathers(
             @RequestAttribute(name = "user", required = false) UserDto user,
-            HttpServletResponse response,
             Model model
     ) {
         if (user == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             model.addAttribute("weathers", List.of());
             model.addAttribute("isUserAuthorized", false);
             return "index";

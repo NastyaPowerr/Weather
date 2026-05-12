@@ -46,13 +46,11 @@ public class LocationController {
     public String addLocation(
             @ModelAttribute LocationDto location,
             @RequestAttribute(name = "user", required = false) UserDto user,
-            HttpServletResponse response,
             Model model
     ) {
         if (user == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             model.addAttribute("error", ExceptionMessages.REQUIRE_AUTHORIZATION);
-            return "redirect:/auth/sign-in";
+            return "index";
         }
         locationService.add(location, user);
         return "redirect:/";
@@ -62,17 +60,16 @@ public class LocationController {
     public String deleteLocation(
             @RequestParam String locationId,
             @RequestAttribute(name = "user", required = false) UserDto user,
-            HttpServletResponse response
+            Model model
     ) {
         try {
             if (user == null) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return "redirect:/auth/sign-in";
+                model.addAttribute("error", ExceptionMessages.REQUIRE_AUTHORIZATION);
+                return "index";
             }
             locationService.delete(locationId, user.id());
             return "redirect:/";
         } catch (ValidationException ex) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return "redirect:/";
         }
     }
