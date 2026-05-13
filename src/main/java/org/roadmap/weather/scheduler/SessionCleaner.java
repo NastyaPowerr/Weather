@@ -1,4 +1,4 @@
-package org.roadmap.weather;
+package org.roadmap.weather.scheduler;
 
 import org.roadmap.weather.service.SessionService;
 import org.springframework.scheduling.annotation.Scheduled;

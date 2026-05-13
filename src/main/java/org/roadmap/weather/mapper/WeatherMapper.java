@@ -8,9 +8,8 @@ import org.mapstruct.MappingTarget;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.WeatherDto;
 import org.roadmap.weather.dto.response.WeatherResponseDto;
-import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
-import org.roadmap.weather.exception.ExternalApiParseException;
+import org.roadmap.weather.exception.mapper.ExternalApiParseException;
 
 @Mapper(componentModel = "spring")
 public interface WeatherMapper {

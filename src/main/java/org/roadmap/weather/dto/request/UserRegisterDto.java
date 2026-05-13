@@ -9,22 +9,22 @@ import jakarta.validation.constraints.Pattern;
 public record UserRegisterDto(
         @NotBlank(message = ValidationConstants.MISSING_LOGIN)
         @Length(
-                min = ValidationConstants.MIN_LOGIN_LENGTH,
-                max = ValidationConstants.MAX_LOGIN_LENGTH,
-                message = ValidationConstants.INVALID_LOGIN_LENGTH
+                min = 2,
+                max = 20,
+                message = "Login length must be between {min} and {max} characters."
         )
-        @Pattern(regexp = ValidationConstants.LOGIN_PATTERN, message = ValidationConstants.INVALID_LOGIN_PATTERN)
+        @Pattern(regexp = "^[A-Za-zА-Яа-я-.@0-9]+$", message = "Login can contain only: English and Russian letters, dots, commercial at.")
         String username,
 
         @NotBlank(message = ValidationConstants.MISSING_PASSWORD)
         @Length(
-                min = ValidationConstants.MIN_PASSWORD_LENGTH,
-                max = ValidationConstants.MAX_PASSWORD_LENGTH,
-                message = ValidationConstants.INVALID_PASSWORD_LENGTH
+                min = 6,
+                max = 50,
+                message = "Password length must be between {min} and {max} characters."
         )
         String password,
 
-        @NotBlank(message = ValidationConstants.MISSING_REPEATED_PASSWORD)
+        @NotBlank(message = "Repeat your password.")
         String repeatedPassword
 ) {
 }

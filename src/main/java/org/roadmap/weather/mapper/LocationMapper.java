@@ -7,7 +7,7 @@ import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.response.LocationResponseDto;
 import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
-import org.roadmap.weather.exception.ExternalApiParseException;
+import org.roadmap.weather.exception.mapper.ExternalApiParseException;
 
 import java.util.List;
 import java.util.Map;

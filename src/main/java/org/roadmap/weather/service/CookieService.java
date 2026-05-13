@@ -12,11 +12,14 @@ public class CookieService {
     @Value("${cookie.duration}")
     private int cookieAge;
 
+    @Value("${cookie.name}")
+    private String cookieName;
+
     private CookieService() {
     }
 
     public Cookie create(UUID sessionId) {
-        Cookie cookie = new Cookie("sessionId", String.valueOf(sessionId));
+        Cookie cookie = new Cookie(cookieName, String.valueOf(sessionId));
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");
@@ -24,9 +27,8 @@ public class CookieService {
         return cookie;
     }
 
-    // delete = give cookie with age = 0
     public Cookie delete() {
-        Cookie cookie = new Cookie("sessionId", null);
+        Cookie cookie = new Cookie(cookieName, null);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");

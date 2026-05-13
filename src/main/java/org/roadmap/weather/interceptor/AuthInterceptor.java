@@ -1,4 +1,4 @@
-package org.roadmap.weather;
+package org.roadmap.weather.interceptor;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +9,7 @@ import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.service.CookieService;
 import org.roadmap.weather.service.SessionService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -20,6 +21,9 @@ public class AuthInterceptor implements HandlerInterceptor {
     private final SessionService sessionService;
     private final AuthService authService;
     private final CookieService cookieService;
+
+    @Value("${cookie.name}")
+    private String cookieName;
 
     public AuthInterceptor(SessionService sessionService, AuthService authService, CookieService cookieService) {
         this.sessionService = sessionService;
@@ -56,7 +60,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             return Optional.empty();
         }
         for (Cookie cookie : cookies) {
-            if ("sessionId".equals(cookie.getName())) {
+            if (cookieName.equals(cookie.getName())) {
                 return Optional.ofNullable(cookie.getValue());
             }
         }

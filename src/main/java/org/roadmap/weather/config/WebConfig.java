@@ -1,6 +1,6 @@
 package org.roadmap.weather.config;
 
-import org.roadmap.weather.AuthInterceptor;
+import org.roadmap.weather.interceptor.AuthInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;

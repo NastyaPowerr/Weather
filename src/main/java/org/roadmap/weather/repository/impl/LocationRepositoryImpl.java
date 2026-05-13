@@ -5,7 +5,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.exception.ConstraintViolationException;
 import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
-import org.roadmap.weather.exception.location.LocationAlreadyExistsForUserException;
+import org.roadmap.weather.exception.location.DuplicateLocationException;
 import org.roadmap.weather.repository.LocationRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +36,7 @@ public class LocationRepositoryImpl implements LocationRepository {
         try {
             session.persist(location);
         } catch (ConstraintViolationException ex) {
-            throw new LocationAlreadyExistsForUserException(ExceptionMessages.LOCATION_CONFLICT_FOR_USER);
+            throw new DuplicateLocationException(ExceptionMessages.LOCATION_CONFLICT_FOR_USER);
         }
     }
 

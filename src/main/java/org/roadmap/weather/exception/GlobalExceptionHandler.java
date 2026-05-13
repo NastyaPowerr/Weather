@@ -1,4 +1,4 @@
-package org.roadmap.weather;
+package org.roadmap.weather.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -6,10 +6,8 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.dto.UserDto;
-import org.roadmap.weather.dto.WeatherDto;
-import org.roadmap.weather.exception.ExceptionMessages;
+import org.roadmap.weather.exception.location.DuplicateLocationException;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
-import org.roadmap.weather.exception.location.LocationAlreadyExistsForUserException;
 import org.roadmap.weather.exception.user.InvalidUserParamsException;
 import org.roadmap.weather.exception.user.PasswordsDoNotMatchException;
 import org.roadmap.weather.exception.user.UserAlreadyExistsException;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice(annotations = Controller.class)
@@ -40,7 +37,7 @@ public class GlobalExceptionHandler {
         return "sign-in";
     }
 
-    @ExceptionHandler(LocationAlreadyExistsForUserException.class)
+    @ExceptionHandler(DuplicateLocationException.class)
     public String handleLocationAlreadyExists(
             RedirectAttributes redirectAttributes,
             HttpServletRequest request,

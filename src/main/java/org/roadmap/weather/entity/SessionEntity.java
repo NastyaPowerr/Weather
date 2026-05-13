@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-// renamed to SessionEntity to avoid collision with hibernate.Session
 @Entity
 @Table(name = "sessions")
 @Getter
