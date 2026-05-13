@@ -1,7 +1,7 @@
 package org.roadmap.weather.controller;
 
 import org.roadmap.weather.dto.UserDto;
-import org.roadmap.weather.dto.Weather;
+import org.roadmap.weather.dto.WeatherDto;
 import org.roadmap.weather.service.WeatherService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,7 +28,7 @@ public class WeatherController {
             model.addAttribute("isUserAuthorized", false);
             return "index";
         }
-        List<Weather> weathers = weatherService.getWeathersForUser(user.id());
+        List<WeatherDto> weathers = weatherService.getWeathersForUser(user.id());
         model.addAttribute("userLogin", user.login());
         model.addAttribute("weathers", weathers);
         model.addAttribute("isUserAuthorized", true);

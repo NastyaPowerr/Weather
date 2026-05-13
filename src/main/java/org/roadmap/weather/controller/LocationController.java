@@ -1,6 +1,5 @@
 package org.roadmap.weather.controller;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.exception.ExceptionMessages;

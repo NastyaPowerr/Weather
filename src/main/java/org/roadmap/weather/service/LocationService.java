@@ -61,8 +61,8 @@ public class LocationService {
 
     @Cacheable(cacheNames = "locations", key = "#userId")
     @Transactional(readOnly = true)
-    public List<Location> findByUserId(Integer userId) {
-        return locationRepository.findByUserId(userId);
+    public List<LocationDto> findByUserId(Integer userId) {
+        return locationMapper.toDtoList(locationRepository.findByUserId(userId));
     }
 
     @CacheEvict(cacheNames = "locations", key = "#userId")

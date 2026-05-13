@@ -5,7 +5,9 @@ import java.util.List;
 
 public record WeatherResponseDto(
         Main main,
-        List<Weather> weather
+        List<Weather> weather,
+        BigDecimal latitude,
+        BigDecimal longitude
 ) {
     public record Main(
             BigDecimal temp,

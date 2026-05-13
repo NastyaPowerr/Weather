@@ -5,9 +5,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.response.LocationResponseDto;
+import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ExternalApiParseException;
 
+import java.util.List;
 import java.util.Map;
 
 @Mapper(componentModel = "spring")
@@ -16,6 +18,8 @@ public interface LocationMapper {
     @Mapping(target = "longitude", source = "lon")
     @Mapping(target = "name", expression = "java(getLocalName(response))")
     LocationDto toDto(LocationResponseDto response);
+
+    List<LocationDto> toDtoList(List<Location> locations);
 
     @BeforeMapping
     default void validateInputs(LocationResponseDto response) {
