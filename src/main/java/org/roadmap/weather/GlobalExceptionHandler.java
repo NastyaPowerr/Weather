@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.roadmap.weather.dto.UserDto;
+import org.roadmap.weather.dto.WeatherDto;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.exception.location.LocationAlreadyExistsForUserException;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice(annotations = Controller.class)
@@ -121,9 +124,21 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(GeocodingApiCallException.class)
-    public String handleGeocodingApiCall(GeocodingApiCallException ex, HttpServletResponse response, Model model) {
+    public String handleGeocodingApiCall(
+            GeocodingApiCallException ex,
+            HttpServletRequest request,
+            Model model
+    ) {
         log.warn("External Api error - Geocoding Api call failed: ", ex);
         model.addAttribute("error", "Weather service temporarily unavailable. Please try again later.");
+
+        UserDto user = (UserDto) request.getAttribute("user");
+        if (user == null) {
+            model.addAttribute("isUserAuthorized", false);
+        } else {
+            model.addAttribute("isUserAuthorized", true);
+            model.addAttribute("userLogin", user.login());
+        }
         return "index";
     }
 
