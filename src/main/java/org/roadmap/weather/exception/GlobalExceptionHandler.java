@@ -78,6 +78,9 @@ public class GlobalExceptionHandler {
             model.addAttribute("username", username);
             return "sign-up";
         }
+        if (uri.contains("locations")) {
+            return "index";
+        }
         return "error";
     }
 

@@ -1,5 +1,6 @@
 package org.roadmap.weather.controller;
 
+import jakarta.validation.Valid;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.exception.ExceptionMessages;
@@ -43,7 +44,7 @@ public class LocationController {
 
     @PostMapping("/locations")
     public String addLocation(
-            @ModelAttribute LocationDto location,
+            @Valid @ModelAttribute LocationDto location,
             @RequestAttribute(name = "user", required = false) UserDto user,
             Model model
     ) {
