@@ -51,6 +51,12 @@
             </div>
 
             <div th:if="${isUserAuthorized}">
+                <div th:if="${weathers.isEmpty()}">
+                    <div class="px-4">
+                        <span class="fs-4">You have not added any locations.
+                            Use the search bar to add locations and see weather in your list.</span>
+                    </div>
+                </div>
                 <div class="row">
                     <div th:each="weather : ${weathers}" class="col-12 col-lg-3 col-md-6 mb-4">
                         <div class="card h-100 position-relative weather-card">

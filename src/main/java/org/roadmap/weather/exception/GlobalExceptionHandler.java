@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice(annotations = Controller.class)
@@ -62,14 +63,12 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        String error = ex
-                .getBindingResult()
-                .getAllErrors()
-                .get(0)
-                .getDefaultMessage();
-        model.addAttribute("error", error);
+        List<String> errors = ex.getBindingResult().getAllErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .toList();
+        model.addAttribute("errors", errors);
         String uri = request.getRequestURI();
-        log.debug("User could not {}. {}", uri, error);
+        log.debug("User could not {}. {}", uri, errors);
         if (uri.contains("sign-in")) {
             return "sign-in";
         }
@@ -79,6 +78,8 @@ public class GlobalExceptionHandler {
             return "sign-up";
         }
         if (uri.contains("locations")) {
+            String error = String.join(", ", errors);
+            model.addAttribute("error", error);
             return "index";
         }
         return "error";
