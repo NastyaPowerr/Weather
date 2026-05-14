@@ -29,6 +29,10 @@ import java.util.List;
 @PropertySource("classpath:application.properties")
 @Slf4j
 public class LocationService {
+    private static final String WEATHER_URL = "https://api.openweathermap.org/geo/1.0/direct?q=%s&limit=%s&appid=%s&lang=%s";
+    private static final String WEATHER_LIMIT = "10";
+    private static final String WEATHER_LANGUAGE = "ru";
+
     private final LocationRepository locationRepository;
     private final LocationMapper locationMapper;
     private final RestTemplate restTemplate;
@@ -84,13 +88,7 @@ public class LocationService {
 
     @Cacheable(cacheNames = "openWeatherMapLocations", key = "#locationName")
     public List<LocationDto> findByName(String locationName) {
-        String url = String.format(
-                "https://api.openweathermap.org/geo/1.0/direct?q=%s&limit=%s&appid=%s&lang=%s",
-                locationName,
-                10,
-                apiKey,
-                "ru"
-        );
+        String url = createUrl(locationName);
         try {
             long start = System.currentTimeMillis();
             log.info("Starting: external API call - searching for locations...");
@@ -124,5 +122,15 @@ public class LocationService {
     @CacheEvict(cacheNames = "openWeatherMapLocations", allEntries = true)
     public void evictLocationCache() {
         log.info("Evicted openWeatherApi locations cache.");
+    }
+
+    private String createUrl(String locationName) {
+        return String.format(
+                WEATHER_URL,
+                locationName,
+                WEATHER_LIMIT,
+                apiKey,
+                WEATHER_LANGUAGE
+        );
     }
 }

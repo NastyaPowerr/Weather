@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.WeatherDto;
 import org.roadmap.weather.dto.response.WeatherResponseDto;
-import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.exception.mapper.ExternalApiParseException;
 import org.roadmap.weather.mapper.WeatherMapper;
@@ -23,6 +22,10 @@ import java.util.concurrent.ExecutorService;
 @PropertySource("classpath:application.properties")
 @Slf4j
 public class WeatherService {
+    private static final String WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=%s&lang=%s";
+    private static final String WEATHER_UNIT = "metric";
+    private static final String WEATHER_LANGUAGE = "ru";
+
     private final LocationService locationService;
     private final WeatherMapper weatherMapper;
     private final RestTemplate restTemplate;
@@ -92,12 +95,12 @@ public class WeatherService {
 
     private String createUrl(LocationDto location) {
         return String.format(
-                "https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=%s&lang=%s",
+                WEATHER_URL,
                 location.latitude(),
                 location.longitude(),
                 apiKey,
-                "metric",
-                "ru"
+                WEATHER_UNIT,
+                WEATHER_LANGUAGE
         );
     }
 }
