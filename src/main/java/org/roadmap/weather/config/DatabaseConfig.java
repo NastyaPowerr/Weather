@@ -4,15 +4,10 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.flywaydb.core.Flyway;
 import org.hibernate.SessionFactory;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.env.Environment;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.hibernate.HibernateTransactionManager;
 import org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -48,7 +43,20 @@ public class DatabaseConfig {
         return new HikariDataSource(config);
     }
 
+    @Bean(initMethod = "migrate")
+    public Flyway flyway(DataSource dataSource) {
+        String schema = env.getProperty("db.schema");
+        return Flyway.configure()
+                .dataSource(dataSource)
+                .locations("db/migration")
+                .schemas(schema)
+                .defaultSchema(schema)
+                .baselineOnMigrate(true)
+                .load();
+    }
+
     @Bean
+    @DependsOn("flyway")
     public LocalSessionFactoryBean sessionFactory(DataSource dataSource) {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
         sessionFactory.setDataSource(dataSource);
@@ -64,7 +72,7 @@ public class DatabaseConfig {
 
         properties.setProperty("hibernate.jdbc.batch_size", "20");
         properties.setProperty("hibernate.jdbc.fetch_size", "100");
-        
+
         sessionFactory.setHibernateProperties(properties);
         return sessionFactory;
     }
@@ -74,22 +82,5 @@ public class DatabaseConfig {
         HibernateTransactionManager transactionManager = new HibernateTransactionManager();
         transactionManager.setSessionFactory(sessionFactory);
         return transactionManager;
-    }
-
-    @Bean(initMethod = "migrate")
-    public Flyway flyway(DataSource dataSource) {
-        String schema = env.getProperty("db.schema");
-        return Flyway.configure()
-                .dataSource(dataSource)
-                .locations("db/migration")
-                .schemas(schema)
-                .defaultSchema(schema)
-                .baselineOnMigrate(true)
-                .load();
-    }
-
-    @Bean
-    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
     }
 }
