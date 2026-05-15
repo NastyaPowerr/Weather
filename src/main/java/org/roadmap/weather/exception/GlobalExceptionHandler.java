@@ -132,6 +132,7 @@ public class GlobalExceptionHandler {
     ) {
         log.warn("External Api error - Geocoding Api call failed: ", ex);
         model.addAttribute("error", "Weather service temporarily unavailable. Please try again later.");
+        model.addAttribute("weathers", List.of());
 
         UserDto user = (UserDto) request.getAttribute("user");
         if (user == null) {
