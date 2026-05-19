@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.service.AuthService;
@@ -17,6 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component
+@Slf4j
 public class AuthInterceptor implements HandlerInterceptor {
     private final SessionService sessionService;
     private final AuthService authService;
@@ -37,19 +39,25 @@ public class AuthInterceptor implements HandlerInterceptor {
             @NonNull HttpServletResponse response,
             @NonNull Object handler
     ) {
-        Optional<String> sessionIdOpt = extractSessionId(request);
-        if (sessionIdOpt.isPresent()) {
-            UUID sessionId = UUID.fromString(sessionIdOpt.get());
-            Optional<SessionDto> session = sessionService.getSession(sessionId);
-            if (session.isPresent()) {
-                SessionDto currentSession = session.get();
-                UserDto user = authService.getById(currentSession.userId());
-                request.setAttribute("user", user);
-                request.setAttribute("sessionId", sessionId);
-            } else {
-                Cookie deletedCookie = cookieService.delete();
-                response.addCookie(deletedCookie);
+        try {
+            Optional<String> sessionIdOpt = extractSessionId(request);
+            if (sessionIdOpt.isPresent()) {
+                UUID sessionId = UUID.fromString(sessionIdOpt.get());
+                Optional<SessionDto> session = sessionService.getSession(sessionId);
+                if (session.isPresent()) {
+                    SessionDto currentSession = session.get();
+                    UserDto user = authService.getById(currentSession.userId());
+                    request.setAttribute("user", user);
+                    request.setAttribute("sessionId", sessionId);
+                } else {
+                    Cookie deletedCookie = cookieService.delete();
+                    response.addCookie(deletedCookie);
+                }
             }
+        } catch (IllegalArgumentException ex) {
+            log.warn("Invalid session id: {}", ex.getMessage());
+            Cookie deletedCookie = cookieService.delete();
+            response.addCookie(deletedCookie);
         }
         return true;
     }
