@@ -3,6 +3,7 @@ package org.roadmap.weather.controller;
 import jakarta.validation.Valid;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.UserDto;
+import org.roadmap.weather.dto.request.SearchDto;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.service.LocationService;
@@ -26,7 +27,7 @@ public class LocationController {
 
     @GetMapping("/search")
     public String findLocations(
-            @RequestParam String name,
+            @Valid @ModelAttribute SearchDto searchRequest,
             @RequestAttribute(name = "user", required = false) UserDto user,
             Model model
     ) {
@@ -36,9 +37,9 @@ public class LocationController {
             model.addAttribute("userLogin", user.login());
             model.addAttribute("isUserAuthorized", true);
         }
-        List<LocationDto> locations = locationService.findByName(name);
+        List<LocationDto> locations = locationService.findByName(searchRequest.name());
         model.addAttribute("locations", locations);
-        model.addAttribute("locationName", name);
+        model.addAttribute("locationName", searchRequest.name());
         return "search-results";
     }
 

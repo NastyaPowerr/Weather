@@ -92,6 +92,18 @@ public class GlobalExceptionHandler {
             model.addAttribute("error", error);
             return "index";
         }
+        if (uri.contains("search")) {
+            String error = String.join(", ", errors);
+            model.addAttribute("error", error);
+            UserDto user = (UserDto) request.getAttribute("user");
+            if (user == null) {
+                model.addAttribute("isUserAuthorized", false);
+            } else {
+                model.addAttribute("isUserAuthorized", true);
+                model.addAttribute("userLogin", user.login());
+            }
+            return "search-results";
+        }
         return "error";
     }
 
