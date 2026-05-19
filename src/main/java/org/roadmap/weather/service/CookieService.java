@@ -21,7 +21,6 @@ public class CookieService {
     public Cookie create(UUID sessionId) {
         Cookie cookie = new Cookie(cookieName, String.valueOf(sessionId));
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge(cookieAge);
         return cookie;
