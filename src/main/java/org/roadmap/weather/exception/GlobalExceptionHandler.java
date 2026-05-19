@@ -32,9 +32,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidUserParamsException.class)
-    public String handleInvalidUserParams(InvalidUserParamsException ex, HttpServletResponse response, Model model) {
+    public String handleInvalidUserParams(
+            InvalidUserParamsException ex,
+            HttpServletResponse response,
+            HttpServletRequest request,
+            Model model
+    ) {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         model.addAttribute("error", ex.getMessage());
+
+        String login = request.getParameter("login");
+        model.addAttribute("login", login);
         return "sign-in";
     }
 
@@ -70,6 +78,8 @@ public class GlobalExceptionHandler {
         String uri = request.getRequestURI();
         log.debug("User could not {}. {}", uri, errors);
         if (uri.contains("sign-in")) {
+            String login = request.getParameter("login");
+            model.addAttribute("login", login);
             return "sign-in";
         }
         if (uri.contains("sign-up")) {
@@ -116,6 +126,8 @@ public class GlobalExceptionHandler {
 
         String uri = request.getRequestURI();
         if (uri.contains("sign-in")) {
+            String login = request.getParameter("login");
+            model.addAttribute("login", login);
             return "sign-in";
         }
         if (uri.contains("sign-up")) {
