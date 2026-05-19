@@ -5,6 +5,10 @@
          version="4.0">
 
     <error-page>
+        <error-code>400</error-code>
+        <location>/WEB-INF/400.html</location>
+    </error-page>
+    <error-page>
         <error-code>404</error-code>
         <location>/WEB-INF/404.html</location>
     </error-page>
@@ -14,6 +18,6 @@
     </error-page>
 
     <session-config>
-        <session-timeout>0</session-timeout>
+        <tracking-mode>COOKIE</tracking-mode>
     </session-config>
 </web-app>
