@@ -29,7 +29,6 @@ public class CookieService {
     public Cookie delete() {
         Cookie cookie = new Cookie(cookieName, null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge(0);
         return cookie;
