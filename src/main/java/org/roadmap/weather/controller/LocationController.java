@@ -5,7 +5,6 @@ import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.dto.request.SearchDto;
 import org.roadmap.weather.exception.ExceptionMessages;
-import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.service.LocationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -63,15 +62,12 @@ public class LocationController {
             @RequestAttribute(name = "user", required = false) UserDto user,
             Model model
     ) {
-        try {
-            if (user == null) {
-                model.addAttribute("error", ExceptionMessages.REQUIRE_AUTHORIZATION);
-                return "index";
-            }
-            locationService.delete(locationId, user.id());
-            return "redirect:/";
-        } catch (ValidationException ex) {
-            return "redirect:/";
+        if (user == null) {
+            model.addAttribute("error", ExceptionMessages.REQUIRE_AUTHORIZATION);
+            return "index";
         }
+        locationService.delete(locationId, user.id());
+        return "redirect:/";
+
     }
 }

@@ -11,6 +11,7 @@ import org.roadmap.weather.exception.location.GeocodingApiCallException;
 import org.roadmap.weather.exception.user.InvalidUserParamsException;
 import org.roadmap.weather.exception.user.PasswordsDoNotMatchException;
 import org.roadmap.weather.exception.user.UserAlreadyExistsException;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -41,8 +42,7 @@ public class GlobalExceptionHandler {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         model.addAttribute("error", ex.getMessage());
 
-        String login = request.getParameter("login");
-        model.addAttribute("login", login);
+        addParam(request, model, "login", "login");
         return "sign-in";
     }
 
@@ -63,6 +63,13 @@ public class GlobalExceptionHandler {
         return "index";
     }
 
+    @ExceptionHandler(ValidationException.class)
+    public String handleValidationException(ValidationException ex, HttpServletResponse response) {
+        log.warn("Validation error: {}", ex.getMessage());
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return "redirect:/";
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public String handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
@@ -72,36 +79,28 @@ public class GlobalExceptionHandler {
     ) {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         List<String> errors = ex.getBindingResult().getAllErrors().stream()
-                .map(error -> error.getDefaultMessage())
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .toList();
         model.addAttribute("errors", errors);
+
         String uri = request.getRequestURI();
         log.debug("User could not {}. {}", uri, errors);
+
         if (uri.contains("sign-in")) {
-            String login = request.getParameter("login");
-            model.addAttribute("login", login);
+            addParam(request, model, "login", "login");
             return "sign-in";
         }
         if (uri.contains("sign-up")) {
-            String username = request.getParameter("username");
-            model.addAttribute("username", username);
+            addParam(request, model, "username", "username");
             return "sign-up";
         }
+        String error = String.join(", ", errors);
+        model.addAttribute("error", error);
         if (uri.contains("locations")) {
-            String error = String.join(", ", errors);
-            model.addAttribute("error", error);
             return "index";
         }
         if (uri.contains("search")) {
-            String error = String.join(", ", errors);
-            model.addAttribute("error", error);
-            UserDto user = (UserDto) request.getAttribute("user");
-            if (user == null) {
-                model.addAttribute("isUserAuthorized", false);
-            } else {
-                model.addAttribute("isUserAuthorized", true);
-                model.addAttribute("userLogin", user.login());
-            }
+            addAuthAttributes(request, model);
             return "search-results";
         }
         return "error";
@@ -114,8 +113,7 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        String username = request.getParameter("username");
-        model.addAttribute("username", username);
+        addParam(request, model, "username", "username");
         model.addAttribute("error", ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
         return "sign-up";
     }
@@ -138,8 +136,7 @@ public class GlobalExceptionHandler {
 
         String uri = request.getRequestURI();
         if (uri.contains("sign-in")) {
-            String login = request.getParameter("login");
-            model.addAttribute("login", login);
+            addParam(request, model, "login", "login");
             return "sign-in";
         }
         if (uri.contains("sign-up")) {
@@ -158,13 +155,7 @@ public class GlobalExceptionHandler {
         model.addAttribute("error", "Weather service temporarily unavailable. Please try again later.");
         model.addAttribute("weathers", List.of());
 
-        UserDto user = (UserDto) request.getAttribute("user");
-        if (user == null) {
-            model.addAttribute("isUserAuthorized", false);
-        } else {
-            model.addAttribute("isUserAuthorized", true);
-            model.addAttribute("userLogin", user.login());
-        }
+        addAuthAttributes(request, model);
         return "index";
     }
 
@@ -173,5 +164,20 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error: ", ex);
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         return "error";
+    }
+
+    private static void addAuthAttributes(HttpServletRequest request, Model model) {
+        UserDto user = (UserDto) request.getAttribute("user");
+        if (user == null) {
+            model.addAttribute("isUserAuthorized", false);
+        } else {
+            model.addAttribute("isUserAuthorized", true);
+            model.addAttribute("userLogin", user.login());
+        }
+    }
+
+    private void addParam(HttpServletRequest request, Model model, String param, String attributeName) {
+        String attribute = request.getParameter(param);
+        model.addAttribute(attributeName, attribute);
     }
 }
