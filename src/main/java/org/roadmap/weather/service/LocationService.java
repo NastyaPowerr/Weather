@@ -8,7 +8,7 @@ import org.roadmap.weather.dto.response.LocationResponseDto;
 import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
-import org.roadmap.weather.exception.location.GeocodingApiCallException;
+import org.roadmap.weather.exception.GeocodingApiCallException;
 import org.roadmap.weather.exception.mapper.ExternalApiParseException;
 import org.roadmap.weather.mapper.LocationMapper;
 import org.roadmap.weather.repository.LocationRepository;

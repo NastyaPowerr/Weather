@@ -8,7 +8,7 @@ import org.roadmap.weather.config.TestConfig;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.WeatherDto;
 import org.roadmap.weather.dto.response.WeatherResponseDto;
-import org.roadmap.weather.exception.location.GeocodingApiCallException;
+import org.roadmap.weather.exception.GeocodingApiCallException;
 import org.roadmap.weather.service.LocationService;
 import org.roadmap.weather.service.WeatherService;
 import org.springframework.beans.factory.annotation.Autowired;

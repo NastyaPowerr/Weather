@@ -10,7 +10,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.response.LocationResponseDto;
-import org.roadmap.weather.exception.location.GeocodingApiCallException;
+import org.roadmap.weather.exception.GeocodingApiCallException;
 import org.roadmap.weather.mapper.LocationMapper;
 import org.roadmap.weather.repository.LocationRepository;
 import org.roadmap.weather.service.LocationService;
