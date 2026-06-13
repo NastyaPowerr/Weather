@@ -5,9 +5,9 @@ public final class ExceptionMessages {
     }
 
     public static final String PASSWORDS_DO_NOT_MATCH = "The passwords don't match.";
-    public static final String USERNAME_TAKEN = "User with that login already exists.";
+    public static final String USERNAME_TAKEN = "User with that username already exists.";
 
-    public static final String INVALID_USER_PARAMS = "Invalid login or password.";
+    public static final String INVALID_USER_PARAMS = "Invalid username or password.";
 
     public static final String LOCATION_CONFLICT_FOR_USER = "User already has that location.";
 

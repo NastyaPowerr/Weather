@@ -28,8 +28,8 @@ public class GlobalExceptionHandler {
         modelAndView.setStatus(HttpStatus.CONFLICT);
         modelAndView.addObject("error", ExceptionMessages.USERNAME_TAKEN);
 
-        addParam(modelAndView, request, "username", "username");
-
+        addSavedUsernameField(modelAndView, request);
+        addAuthAttributes(request, modelAndView);
         return modelAndView;
     }
 
@@ -39,7 +39,8 @@ public class GlobalExceptionHandler {
         modelAndView.setStatus(HttpStatus.UNAUTHORIZED);
         modelAndView.addObject("error", ex.getMessage());
 
-        addParam(modelAndView, request, "login", "login");
+        addSavedUsernameField(modelAndView, request);
+        addAuthAttributes(request, modelAndView);
         return modelAndView;
     }
 
@@ -49,7 +50,8 @@ public class GlobalExceptionHandler {
         modelAndView.setStatus(HttpStatus.BAD_REQUEST);
         modelAndView.addObject("error", ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
 
-        addParam(modelAndView, request, "username", "username");
+        addSavedUsernameField(modelAndView, request);
+        addAuthAttributes(request, modelAndView);
         return modelAndView;
     }
 
@@ -67,6 +69,8 @@ public class GlobalExceptionHandler {
         ModelAndView modelAndView = new ModelAndView("index");
         modelAndView.setStatus(HttpStatus.CONFLICT);
         modelAndView.addObject("error", ExceptionMessages.USER_ALREADY_HAS_LOCATION);
+
+        addAuthAttributes(request, modelAndView);
         return modelAndView;
     }
 
@@ -79,26 +83,31 @@ public class GlobalExceptionHandler {
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .toList();
 
+        boolean hasTypeMismatch = ex.getBindingResult().getAllErrors().stream()
+                .anyMatch(error -> error.getCode() != null && error.getCode().contains("typeMismatch"));
+
         String viewName = getViewName(request);
         ModelAndView modelAndView = new ModelAndView(viewName);
         modelAndView.setStatus(HttpStatus.BAD_REQUEST);
 
-        modelAndView.addObject("errors", errors);
-        String error = String.join(", ", errors);
-        modelAndView.addObject("error", error);
+        String errorMessage = "Invalid input.";
+
+        if (!errors.isEmpty() && !hasTypeMismatch) {
+            errorMessage = errors.get(0);
+        }
+        modelAndView.addObject("error", errorMessage);
 
         String uri = request.getRequestURI();
         log.debug("User could not {}. {}", uri, errors);
 
-        if (uri.contains("sign-in")) {
-            addParam(modelAndView, request, "login", "login");
+        Object weathers = request.getAttribute("weathers");
+        if (weathers instanceof List<?>) {
+            modelAndView.addObject("weathers", weathers);
+        } else {
+            modelAndView.addObject("weathers", List.of());
         }
-        if (uri.contains("sign-up")) {
-            addParam(modelAndView, request, "username", "username");
-        }
-        if (uri.contains("search")) {
-            addAuthAttributes(request, modelAndView);
-        }
+        addSavedUsernameField(modelAndView, request);
+        addAuthAttributes(request, modelAndView);
         return modelAndView;
     }
 
@@ -123,13 +132,7 @@ public class GlobalExceptionHandler {
 
         modelAndView.addObject("error", "Please check your input.");
         modelAndView.setStatus(HttpStatus.BAD_REQUEST);
-        String uri = request.getRequestURI();
-        if (uri.contains("sign-in")) {
-            addParam(modelAndView, request, "login", "login");
-        }
-        if (uri.contains("sign-up")) {
-            addParam(modelAndView, request, "username", "username");
-        }
+        addAuthAttributes(request, modelAndView);
         return modelAndView;
     }
 
@@ -178,19 +181,17 @@ public class GlobalExceptionHandler {
             modelAndView.addObject("isUserAuthorized", false);
         } else {
             modelAndView.addObject("isUserAuthorized", true);
-            modelAndView.addObject("userLogin", user.login());
+            modelAndView.addObject("username", user.username());
         }
     }
 
-    private void addParam(
+    private void addSavedUsernameField(
             ModelAndView modelAndView,
-            HttpServletRequest request,
-            String paramName,
-            String attributeName
+            HttpServletRequest request
     ) {
-        String value = request.getParameter(paramName);
+        String value = request.getParameter("username");
         if (value != null) {
-            modelAndView.addObject(attributeName, value);
+            modelAndView.addObject("username", value);
         }
     }
 }

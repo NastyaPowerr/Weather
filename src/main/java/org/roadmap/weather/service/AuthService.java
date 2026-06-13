@@ -56,7 +56,7 @@ public class AuthService {
     @Loggable
     @Transactional
     public SessionDto authorize(UserLoginDto userDto) {
-        User user = authRepository.findByLogin(userDto.login())
+        User user = authRepository.findByLogin(userDto.username())
                 .orElseThrow(() -> new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS));
         if (isPasswordVerified(userDto.password().toCharArray(), user.getPassword())) {
             return sessionService.create(user.getId());

@@ -31,8 +31,8 @@
             <form th:action="@{/auth/sign-in}" method="post" class="mt-4">
                 <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="login" required
-                           th:value="${login}"/>
+                    <input type="text" class="form-control" id="username" name="username" required
+                           th:value="${username}"/>
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Password</label>

@@ -52,7 +52,7 @@ public class AuthServiceTest {
 
     @Test
     void givenUser_whenRegister_thenShouldBeSavedInDatabase() {
-        UserRegisterDto user = new UserRegisterDto("login", "password", "password");
+        UserRegisterDto user = new UserRegisterDto("username", "password", "password");
 
         authService.register(user);
         Session session = sessionFactory.getCurrentSession();
@@ -61,8 +61,9 @@ public class AuthServiceTest {
                                 FROM User
                                 WHERE login = :login
                                 """,
-                        User.class)
-                .setParameter("login", user.username())
+                        User.class
+                )
+                .setParameter("username", user.username())
                 .uniqueResultOptional();
         Assertions.assertEquals(user.username(), savedUser.get().getLogin());
     }
@@ -75,14 +76,14 @@ public class AuthServiceTest {
 
     @Test
     void givenNullPasswordUser_whenRegister_thenShouldThrowException() {
-        UserRegisterDto user = new UserRegisterDto("login", null, null);
+        UserRegisterDto user = new UserRegisterDto("username", null, null);
         Assertions.assertThrows(ConstraintViolationException.class, () -> authService.register(user));
     }
 
     @Test
     void givenExistedLogin_whenRegister_thenShouldThrowAnException() {
-        UserRegisterDto firstUser = new UserRegisterDto("login", "password", "password");
-        UserRegisterDto secondUser = new UserRegisterDto("login", "password", "password");
+        UserRegisterDto firstUser = new UserRegisterDto("username", "password", "password");
+        UserRegisterDto secondUser = new UserRegisterDto("username", "password", "password");
 
         authService.register(firstUser);
         Assertions.assertThrows(UserAlreadyExistsException.class, () -> authService.register(secondUser));
@@ -91,7 +92,7 @@ public class AuthServiceTest {
     // осознанно пошла через рефлексию
     @Test
     void givenUser_whenRegister_thenPasswordShouldBeHashed() {
-        UserRegisterDto user = new UserRegisterDto("login", "password", "password");
+        UserRegisterDto user = new UserRegisterDto("username", "password", "password");
 
         authService.register(user);
 
@@ -101,8 +102,9 @@ public class AuthServiceTest {
                                 FROM User
                                 WHERE login = :login
                                 """,
-                        User.class)
-                .setParameter("login", user.username())
+                        User.class
+                )
+                .setParameter("username", user.username())
                 .uniqueResultOptional();
         Assertions.assertNotEquals(user.password(), savedUser.get().getPassword());
 
@@ -126,10 +128,10 @@ public class AuthServiceTest {
 
     @Test
     void givenUser_whenAuthorize_thenShouldGiveSessionAndSaveInDatabase() {
-        UserRegisterDto registerUser = new UserRegisterDto("login", "password", "password");
+        UserRegisterDto registerUser = new UserRegisterDto("username", "password", "password");
         authService.register(registerUser);
 
-        UserLoginDto loginUser = new UserLoginDto("login", "password");
+        UserLoginDto loginUser = new UserLoginDto("username", "password");
         SessionDto session = authService.authorize(loginUser);
 
         Optional<SessionDto> savedSession = sessionService.getSession(session.id());
@@ -139,25 +141,25 @@ public class AuthServiceTest {
 
     @Test
     void givenUser_whenAuthorizeWithWrongPassword_thenShouldThrowException() {
-        UserRegisterDto registerUser = new UserRegisterDto("login", "password", "password");
+        UserRegisterDto registerUser = new UserRegisterDto("username", "password", "password");
         authService.register(registerUser);
 
-        UserLoginDto loginUser = new UserLoginDto("login", "wrong_password");
+        UserLoginDto loginUser = new UserLoginDto("username", "wrong_password");
         Assertions.assertThrows(InvalidUserParamsException.class, () -> authService.authorize(loginUser));
     }
 
     @Test
     void givenNotSavedUser_whenAuthorize_thenShouldThrowException() {
-        UserLoginDto loginUser = new UserLoginDto("login", "password");
+        UserLoginDto loginUser = new UserLoginDto("username", "password");
         Assertions.assertThrows(InvalidUserParamsException.class, () -> authService.authorize(loginUser));
     }
 
     @Test
     void givenSession_whenLogout_thenShouldDeleteSession() {
-        UserRegisterDto registerUser = new UserRegisterDto("login", "password", "password");
+        UserRegisterDto registerUser = new UserRegisterDto("username", "password", "password");
         authService.register(registerUser);
 
-        UserLoginDto loginUser = new UserLoginDto("login", "password");
+        UserLoginDto loginUser = new UserLoginDto("username", "password");
         SessionDto session = authService.authorize(loginUser);
         Optional<SessionDto> savedSession = sessionService.getSession(session.id());
 
@@ -173,10 +175,10 @@ public class AuthServiceTest {
 
     @Test
     void givenSession_whenSessionExpires_thenSessionIsNotGiven() throws InterruptedException {
-        UserRegisterDto registerUser = new UserRegisterDto("login", "password", "password");
+        UserRegisterDto registerUser = new UserRegisterDto("username", "password", "password");
         authService.register(registerUser);
 
-        UserLoginDto loginUser = new UserLoginDto("login", "password");
+        UserLoginDto loginUser = new UserLoginDto("username", "password");
         SessionDto session = authService.authorize(loginUser);
 
         Optional<SessionDto> savedSession = sessionService.getSession(session.id());

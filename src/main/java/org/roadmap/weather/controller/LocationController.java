@@ -33,7 +33,7 @@ public class LocationController {
         if (user == null) {
             model.addAttribute("isUserAuthorized", false);
         } else {
-            model.addAttribute("userLogin", user.login());
+            model.addAttribute("username", user.username());
             model.addAttribute("isUserAuthorized", true);
         }
         List<LocationDto> locations = locationService.findByName(searchRequest.name());

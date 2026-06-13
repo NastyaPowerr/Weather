@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 public record UserRegisterDto(
-        @NotBlank(message = ValidationConstants.MISSING_LOGIN)
+        @NotBlank(message = ValidationConstants.MISSING_USERNAME)
         @Length(
                 min = 2,
                 max = 20,

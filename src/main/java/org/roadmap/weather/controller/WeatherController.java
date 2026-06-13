@@ -29,7 +29,7 @@ public class WeatherController {
             return "index";
         }
         List<WeatherDto> weathers = weatherService.getWeathersForUser(user.id());
-        model.addAttribute("userLogin", user.login());
+        model.addAttribute("username", user.username());
         model.addAttribute("weathers", weathers);
         model.addAttribute("isUserAuthorized", true);
         return "index";
