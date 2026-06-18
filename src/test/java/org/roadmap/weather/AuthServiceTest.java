@@ -4,7 +4,6 @@ import jakarta.validation.ConstraintViolationException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.roadmap.weather.config.TestConfig;
@@ -18,8 +17,9 @@ import org.roadmap.weather.service.AuthService;
 import org.roadmap.weather.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +28,9 @@ import java.util.Optional;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestConfig.class)
-@ActiveProfiles("test")
+@TestPropertySource("application-test.properties")
 @Transactional
+@Rollback
 public class AuthServiceTest {
     @Autowired
     private AuthService authService;
@@ -43,13 +44,6 @@ public class AuthServiceTest {
     @Value("${session.duration}")
     private long sessionDuration;
 
-    @BeforeEach
-    void setUp() {
-        Session session = sessionFactory.getCurrentSession();
-        session.createMutationQuery("DELETE FROM SessionEntity").executeUpdate();
-        session.createMutationQuery("DELETE FROM User").executeUpdate();
-    }
-
     @Test
     void givenUser_whenRegister_thenShouldBeSavedInDatabase() {
         UserRegisterDto user = new UserRegisterDto("username", "password", "password");
@@ -59,7 +53,7 @@ public class AuthServiceTest {
         Optional<User> savedUser = session.createQuery(
                         """
                                 FROM User
-                                WHERE login = :login
+                                WHERE login = :username
                                 """,
                         User.class
                 )
@@ -89,7 +83,7 @@ public class AuthServiceTest {
         Assertions.assertThrows(UserAlreadyExistsException.class, () -> authService.register(secondUser));
     }
 
-    // осознанно пошла через рефлексию
+    // осознанно пошла через рефлексию для учения рефлексии :)
     @Test
     void givenUser_whenRegister_thenPasswordShouldBeHashed() {
         UserRegisterDto user = new UserRegisterDto("username", "password", "password");
@@ -100,7 +94,7 @@ public class AuthServiceTest {
         Optional<User> savedUser = session.createQuery(
                         """
                                 FROM User
-                                WHERE login = :login
+                                WHERE login = :username
                                 """,
                         User.class
                 )
@@ -185,6 +179,7 @@ public class AuthServiceTest {
         Assertions.assertNotNull(session.id());
         Assertions.assertTrue(savedSession.isPresent());
 
+        System.out.println(sessionDuration);
         Thread.sleep(sessionDuration + 1);
         Optional<SessionDto> expiredSession = sessionService.getSession(session.id());
 
