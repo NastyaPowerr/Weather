@@ -1,5 +1,6 @@
 package org.roadmap.weather.service;
 
+import lombok.RequiredArgsConstructor;
 import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.entity.SessionEntity;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class SessionService {
     private final SessionRepository sessionRepository;
     private final SessionMapper sessionMapper;
@@ -23,10 +25,6 @@ public class SessionService {
     @Value("${session.duration}")
     private long sessionDuration;
 
-    public SessionService(SessionRepository sessionRepository, SessionMapper sessionMapper) {
-        this.sessionRepository = sessionRepository;
-        this.sessionMapper = sessionMapper;
-    }
 
     @Loggable
     @Transactional

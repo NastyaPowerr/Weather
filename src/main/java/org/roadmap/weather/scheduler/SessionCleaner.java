@@ -1,16 +1,14 @@
 package org.roadmap.weather.scheduler;
 
+import lombok.RequiredArgsConstructor;
 import org.roadmap.weather.service.SessionService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class SessionCleaner {
     private final SessionService sessionService;
-
-    public SessionCleaner(SessionService sessionService) {
-        this.sessionService = sessionService;
-    }
 
     @Scheduled(cron = "0 0 10 * * *")
     public void cleanExpiredSessions() {

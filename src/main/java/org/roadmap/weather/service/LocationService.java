@@ -1,5 +1,6 @@
 package org.roadmap.weather.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.LocationDto;
@@ -28,6 +29,7 @@ import java.util.List;
 @Service
 @PropertySource("classpath:application.properties")
 @Slf4j
+@RequiredArgsConstructor
 public class LocationService {
     private static final String WEATHER_URL = "https://api.openweathermap.org/geo/1.0/direct?q=%s&limit=%s&appid=%s&lang=%s";
     private static final String WEATHER_LIMIT = "10";
@@ -39,16 +41,6 @@ public class LocationService {
 
     @Value("${weather.api.key}")
     private String apiKey;
-
-    public LocationService(
-            LocationRepository locationRepository,
-            LocationMapper locationMapper,
-            RestTemplate restTemplate
-    ) {
-        this.locationRepository = locationRepository;
-        this.locationMapper = locationMapper;
-        this.restTemplate = restTemplate;
-    }
 
     @Loggable
     @CacheEvict(cacheNames = "locations", key = "#user.id()")

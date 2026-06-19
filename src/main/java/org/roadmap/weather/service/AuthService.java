@@ -2,6 +2,7 @@ package org.roadmap.weather.service;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
@@ -23,20 +24,11 @@ import java.util.UUID;
 
 @Service
 @Validated
+@RequiredArgsConstructor
 public class AuthService {
     private final SessionService sessionService;
     private final AuthRepository authRepository;
     private final UserMapper userMapper;
-
-    public AuthService(
-            AuthRepository authRepository,
-            SessionService sessionService,
-            UserMapper userMapper
-    ) {
-        this.sessionService = sessionService;
-        this.authRepository = authRepository;
-        this.userMapper = userMapper;
-    }
 
     @Loggable
     @Transactional

@@ -1,5 +1,6 @@
 package org.roadmap.weather.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.dto.WeatherDto;
 import org.roadmap.weather.service.WeatherService;
@@ -11,12 +12,9 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import java.util.List;
 
 @Controller
+@RequiredArgsConstructor
 public class WeatherController {
     private final WeatherService weatherService;
-
-    public WeatherController(WeatherService weatherService) {
-        this.weatherService = weatherService;
-    }
 
     @GetMapping("/")
     public String getWeathers(

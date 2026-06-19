@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.UserDto;
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
     private final SessionService sessionService;
     private final AuthService authService;
@@ -26,12 +28,6 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Value("${cookie.name}")
     private String cookieName;
-
-    public AuthInterceptor(SessionService sessionService, AuthService authService, CookieService cookieService) {
-        this.sessionService = sessionService;
-        this.authService = authService;
-        this.cookieService = cookieService;
-    }
 
     @Override
     public boolean preHandle(

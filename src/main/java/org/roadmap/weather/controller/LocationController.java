@@ -1,6 +1,7 @@
 package org.roadmap.weather.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.UserDto;
 import org.roadmap.weather.dto.request.SearchDto;
@@ -17,12 +18,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 @Controller
+@RequiredArgsConstructor
 public class LocationController {
     private final LocationService locationService;
-
-    public LocationController(LocationService locationService) {
-        this.locationService = locationService;
-    }
 
     @GetMapping("/search")
     public String findLocations(

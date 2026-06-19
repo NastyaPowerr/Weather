@@ -3,6 +3,7 @@ package org.roadmap.weather.controller;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.roadmap.weather.dto.SessionDto;
 import org.roadmap.weather.dto.request.UserLoginDto;
 import org.roadmap.weather.dto.request.UserRegisterDto;
@@ -18,14 +19,10 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
     private final CookieService cookieService;
-
-    public AuthController(AuthService authService, CookieService cookieService) {
-        this.authService = authService;
-        this.cookieService = cookieService;
-    }
 
     @GetMapping("/sign-up")
     public String register() {

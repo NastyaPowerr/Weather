@@ -1,5 +1,6 @@
 package org.roadmap.weather.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.dto.LocationDto;
 import org.roadmap.weather.dto.WeatherDto;
@@ -21,6 +22,7 @@ import java.util.concurrent.ExecutorService;
 @Service
 @PropertySource("classpath:application.properties")
 @Slf4j
+@RequiredArgsConstructor
 public class WeatherService {
     private static final String WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=%s&lang=%s";
     private static final String WEATHER_UNIT = "metric";
@@ -33,18 +35,6 @@ public class WeatherService {
 
     @Value("${weather.api.key}")
     private String apiKey;
-
-    public WeatherService(
-            LocationService locationService,
-            WeatherMapper weatherMapper,
-            RestTemplate restTemplate,
-            ExecutorService executorService
-    ) {
-        this.locationService = locationService;
-        this.weatherMapper = weatherMapper;
-        this.restTemplate = restTemplate;
-        this.weatherApiExecutor = executorService;
-    }
 
     public List<WeatherDto> getWeathersForUser(Integer userId) {
         List<LocationDto> locations = locationService.findByUserId(userId);
