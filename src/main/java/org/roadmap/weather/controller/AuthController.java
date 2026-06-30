@@ -4,7 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.roadmap.weather.dto.SessionDto;
+import org.roadmap.weather.dto.internal.SessionDto;
 import org.roadmap.weather.dto.request.UserLoginDto;
 import org.roadmap.weather.dto.request.UserRegisterDto;
 import org.roadmap.weather.service.AuthService;

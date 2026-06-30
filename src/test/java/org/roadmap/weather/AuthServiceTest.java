@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.roadmap.weather.config.TestConfig;
-import org.roadmap.weather.dto.SessionDto;
+import org.roadmap.weather.dto.internal.SessionDto;
 import org.roadmap.weather.dto.request.UserLoginDto;
 import org.roadmap.weather.dto.request.UserRegisterDto;
 import org.roadmap.weather.entity.User;

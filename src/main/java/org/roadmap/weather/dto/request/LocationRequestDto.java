@@ -1,9 +1,8 @@
-package org.roadmap.weather.dto;
+package org.roadmap.weather.dto.request;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Length;
@@ -11,16 +10,14 @@ import org.roadmap.weather.util.ValidationConstants;
 
 import java.math.BigDecimal;
 
-public record LocationDto(
-        Integer id,
-
+public record LocationRequestDto(
         @NotBlank(message = "Location name is required.")
         @Length(
                 min = 2,
-                max = 100,
+                max = 50,
                 message = "Location name must be between {min} and {max} characters."
         )
-        @Pattern(regexp = "^[A-Za-zА-Яа-я-.,]+$", message = "Location can contain only: English and Russian letters, dots, dashes.")
+        @Pattern(regexp = "^[A-Za-zА-Яа-я-.'0-9\\s]+$", message = "Location can contain only: English and Russian letters, dots, dashes.")
         String name,
 
         @NotNull(message = "Latitude is required.")

@@ -1,4 +1,4 @@
-package org.roadmap.weather.dto.response;
+package org.roadmap.weather.dto.openweather.response;
 
 import java.math.BigDecimal;
 import java.util.List;

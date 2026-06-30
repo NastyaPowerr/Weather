@@ -5,9 +5,9 @@ import org.mapstruct.BeforeMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.roadmap.weather.dto.LocationDto;
-import org.roadmap.weather.dto.WeatherDto;
-import org.roadmap.weather.dto.response.WeatherResponseDto;
+import org.roadmap.weather.dto.internal.LocationDto;
+import org.roadmap.weather.dto.view.WeatherDto;
+import org.roadmap.weather.dto.openweather.response.WeatherResponseDto;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.mapper.ExternalApiParseException;
 

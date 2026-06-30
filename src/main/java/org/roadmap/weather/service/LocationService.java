@@ -3,9 +3,10 @@ package org.roadmap.weather.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.aspect.Loggable;
-import org.roadmap.weather.dto.LocationDto;
-import org.roadmap.weather.dto.UserDto;
-import org.roadmap.weather.dto.response.LocationResponseDto;
+import org.roadmap.weather.dto.internal.LocationDto;
+import org.roadmap.weather.dto.request.LocationRequestDto;
+import org.roadmap.weather.dto.view.UserDto;
+import org.roadmap.weather.dto.openweather.response.LocationResponseDto;
 import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
@@ -45,7 +46,7 @@ public class LocationService {
     @Loggable
     @CacheEvict(cacheNames = "locations", key = "#user.id()")
     @Transactional
-    public void add(LocationDto locationDto, UserDto user) {
+    public void add(LocationRequestDto locationDto, UserDto user) {
         locationRepository.save(
                 new Location(
                         locationDto.name(),

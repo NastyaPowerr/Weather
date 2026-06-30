@@ -2,9 +2,9 @@ package org.roadmap.weather.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.roadmap.weather.dto.LocationDto;
-import org.roadmap.weather.dto.WeatherDto;
-import org.roadmap.weather.dto.response.WeatherResponseDto;
+import org.roadmap.weather.dto.internal.LocationDto;
+import org.roadmap.weather.dto.view.WeatherDto;
+import org.roadmap.weather.dto.openweather.response.WeatherResponseDto;
 import org.roadmap.weather.exception.GeocodingApiCallException;
 import org.roadmap.weather.exception.mapper.ExternalApiParseException;
 import org.roadmap.weather.mapper.WeatherMapper;

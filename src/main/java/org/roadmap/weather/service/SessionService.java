@@ -2,7 +2,7 @@ package org.roadmap.weather.service;
 
 import lombok.RequiredArgsConstructor;
 import org.roadmap.weather.aspect.Loggable;
-import org.roadmap.weather.dto.SessionDto;
+import org.roadmap.weather.dto.internal.SessionDto;
 import org.roadmap.weather.entity.SessionEntity;
 import org.roadmap.weather.mapper.SessionMapper;
 import org.roadmap.weather.repository.SessionRepository;

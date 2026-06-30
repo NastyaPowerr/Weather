@@ -3,7 +3,7 @@ package org.roadmap.weather.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.roadmap.weather.dto.UserDto;
+import org.roadmap.weather.dto.view.UserDto;
 import org.roadmap.weather.exception.location.DuplicateLocationException;
 import org.roadmap.weather.exception.user.InvalidUserParamsException;
 import org.roadmap.weather.exception.user.PasswordsDoNotMatchException;

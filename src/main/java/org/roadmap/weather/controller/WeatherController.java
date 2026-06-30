@@ -1,8 +1,8 @@
 package org.roadmap.weather.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.roadmap.weather.dto.UserDto;
-import org.roadmap.weather.dto.WeatherDto;
+import org.roadmap.weather.dto.view.UserDto;
+import org.roadmap.weather.dto.view.WeatherDto;
 import org.roadmap.weather.service.WeatherService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

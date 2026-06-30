@@ -1,4 +1,4 @@
-package org.roadmap.weather.dto;
+package org.roadmap.weather.dto.view;
 
 import java.math.BigDecimal;
 

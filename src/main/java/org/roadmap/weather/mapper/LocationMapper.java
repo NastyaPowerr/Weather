@@ -3,8 +3,8 @@ package org.roadmap.weather.mapper;
 import org.mapstruct.BeforeMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.roadmap.weather.dto.LocationDto;
-import org.roadmap.weather.dto.response.LocationResponseDto;
+import org.roadmap.weather.dto.openweather.response.LocationResponseDto;
+import org.roadmap.weather.dto.view.LocationDto;
 import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.mapper.ExternalApiParseException;
@@ -17,9 +17,11 @@ public interface LocationMapper {
     @Mapping(target = "latitude", source = "lat")
     @Mapping(target = "longitude", source = "lon")
     @Mapping(target = "name", expression = "java(getLocalName(response))")
-    LocationDto toDto(LocationResponseDto response);
+    org.roadmap.weather.dto.internal.LocationDto toDto(LocationResponseDto response);
 
-    List<LocationDto> toDtoList(List<Location> locations);
+    List<org.roadmap.weather.dto.internal.LocationDto> toDtoList(List<Location> locations);
+
+    List<LocationDto> toViewDtoList(List<org.roadmap.weather.dto.internal.LocationDto> locations);
 
     @BeforeMapping
     default void validateInputs(LocationResponseDto response) {

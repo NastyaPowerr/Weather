@@ -1,4 +1,4 @@
-package org.roadmap.weather.dto;
+package org.roadmap.weather.dto.internal;
 
 import java.sql.Timestamp;
 import java.util.UUID;

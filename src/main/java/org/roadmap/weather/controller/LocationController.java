@@ -2,9 +2,11 @@ package org.roadmap.weather.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.roadmap.weather.dto.LocationDto;
-import org.roadmap.weather.dto.UserDto;
+import org.roadmap.weather.dto.request.LocationRequestDto;
 import org.roadmap.weather.dto.request.SearchDto;
+import org.roadmap.weather.dto.view.LocationDto;
+import org.roadmap.weather.dto.view.UserDto;
+import org.roadmap.weather.mapper.LocationMapper;
 import org.roadmap.weather.service.LocationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LocationController {
     private final LocationService locationService;
+    private final LocationMapper locationMapper;
 
     @GetMapping("/search")
     public String findLocations(
@@ -33,7 +36,9 @@ public class LocationController {
             model.addAttribute("username", user.username());
             model.addAttribute("isUserAuthorized", true);
         }
-        List<LocationDto> locations = locationService.findByName(searchRequest.name());
+        List<LocationDto> locations = locationMapper.toViewDtoList(
+                locationService.findByName(searchRequest.name())
+        );
         model.addAttribute("locations", locations);
         model.addAttribute("locationName", searchRequest.name());
         return "search-results";
@@ -41,7 +46,7 @@ public class LocationController {
 
     @PostMapping("/locations")
     public String addLocation(
-            @Valid @ModelAttribute LocationDto location,
+            @Valid @ModelAttribute LocationRequestDto location,
             @RequestAttribute("user") UserDto user
     ) {
         locationService.add(location, user);
@@ -55,6 +60,5 @@ public class LocationController {
     ) {
         locationService.delete(locationId, user.id());
         return "redirect:/";
-
     }
 }
