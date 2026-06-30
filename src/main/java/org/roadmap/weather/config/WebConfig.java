@@ -1,6 +1,7 @@
 package org.roadmap.weather.config;
 
 import org.roadmap.weather.interceptor.AuthInterceptor;
+import org.roadmap.weather.interceptor.AuthRequiredInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -19,9 +20,11 @@ import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 @EnableAspectJAutoProxy
 public class WebConfig implements WebMvcConfigurer {
     private final AuthInterceptor authInterceptor;
+    private final AuthRequiredInterceptor authRequiredInterceptor;
 
-    public WebConfig(AuthInterceptor authInterceptor) {
+    public WebConfig(AuthInterceptor authInterceptor, AuthRequiredInterceptor authRequiredInterceptor) {
         this.authInterceptor = authInterceptor;
+        this.authRequiredInterceptor = authRequiredInterceptor;
     }
 
     @Bean
@@ -65,6 +68,11 @@ public class WebConfig implements WebMvcConfigurer {
                         "/error",
                         "/auth/sign-in",
                         "/auth/sign-up"
+                );
+        registry.addInterceptor(authRequiredInterceptor)
+                .addPathPatterns(
+                        "/locations",
+                        "/locations/delete"
                 );
     }
 }
