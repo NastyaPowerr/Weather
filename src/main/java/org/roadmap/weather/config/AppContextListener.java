@@ -13,6 +13,9 @@ public class AppContextListener implements ServletContextListener {
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 
         String profile = System.getProperty("spring.profiles.active");
+        if (profile == null || profile.isBlank()) {
+            profile = "dev";
+        }
         context.getEnvironment().setActiveProfiles(profile);
 
         context.register(AppConfig.class);
