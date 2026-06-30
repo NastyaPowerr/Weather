@@ -64,8 +64,6 @@ public class DatabaseConfig {
         Properties properties = new Properties();
         properties.setProperty("hibernate.type.preferred_uuid_jdbc_type", "CHAR");
         properties.setProperty("hibernate.hbm2ddl.auto", "validate");
-        properties.setProperty("hibernate.show_sql", "true");
-        properties.setProperty("hibernate.format_sql", "true");
 
         String schema = env.getProperty("db.schema");
         properties.setProperty("hibernate.default_schema", schema);
