@@ -5,9 +5,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.internal.SessionDto;
-import org.roadmap.weather.dto.view.UserDto;
 import org.roadmap.weather.dto.request.UserLoginDto;
 import org.roadmap.weather.dto.request.UserRegisterDto;
+import org.roadmap.weather.dto.view.UserDto;
 import org.roadmap.weather.entity.User;
 import org.roadmap.weather.exception.ExceptionMessages;
 import org.roadmap.weather.exception.ValidationException;
@@ -37,7 +37,8 @@ public class AuthService {
             throw new PasswordsDoNotMatchException(ExceptionMessages.PASSWORDS_DO_NOT_MATCH);
         }
         String hashPassword = getEncryptedPassword(userDto.password());
-        User userToSave = new User(userDto.username(), hashPassword);
+        String username = extractUsername(userDto.username());
+        User userToSave = new User(username, hashPassword);
         try {
             authRepository.save(userToSave);
         } catch (InvalidUserParamsException ex) {
@@ -48,7 +49,8 @@ public class AuthService {
     @Loggable
     @Transactional
     public SessionDto authorize(UserLoginDto userDto) {
-        User user = authRepository.findByLogin(userDto.username())
+        String username = extractUsername(userDto.username());
+        User user = authRepository.findByLogin(username)
                 .orElseThrow(() -> new InvalidUserParamsException(ExceptionMessages.INVALID_USER_PARAMS));
         if (isPasswordVerified(userDto.password().toCharArray(), user.getPassword())) {
             return sessionService.create(user.getId());
@@ -75,5 +77,9 @@ public class AuthService {
 
     private boolean isPasswordVerified(char[] password, String hashedPassword) {
         return BCrypt.verifyer().verify(password, hashedPassword).verified;
+    }
+
+    private static String extractUsername(String userDto) {
+        return userDto.strip();
     }
 }
