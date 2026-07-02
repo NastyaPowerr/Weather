@@ -7,8 +7,6 @@ import org.roadmap.weather.entity.SessionEntity;
 import org.roadmap.weather.mapper.SessionMapper;
 import org.roadmap.weather.repository.SessionRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,13 +35,11 @@ public class SessionService {
         return sessionMapper.toDto(session);
     }
 
-    @CacheEvict(cacheNames = "sessions", key = "#sessionId")
     @Transactional
     public void deleteSession(UUID sessionId) {
         sessionRepository.deleteById(sessionId);
     }
 
-    @Cacheable(cacheNames = "sessions", key = "#sessionId")
     @Transactional(readOnly = true)
     public Optional<SessionDto> getSession(UUID sessionId) {
         Optional<SessionEntity> session = sessionRepository.findById(sessionId);
@@ -57,7 +53,6 @@ public class SessionService {
     }
 
     @Loggable
-    @CacheEvict(cacheNames = "sessions", allEntries = true)
     @Transactional
     public void deleteExpiredSessions() {
         sessionRepository.deleteExpiredSessions();
