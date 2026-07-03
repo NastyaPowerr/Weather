@@ -22,7 +22,7 @@ public class LocationRepositoryImpl implements LocationRepository {
     private final static String DELETE_BY_ID_HQL = """
             DELETE
             FROM Location
-            WHERE id=:id
+            WHERE id=:id AND userId = :userId
             """;
     private final SessionFactory sessionFactory;
 
@@ -49,10 +49,11 @@ public class LocationRepositoryImpl implements LocationRepository {
     }
 
     @Override
-    public void deleteById(Integer id) {
+    public int deleteByIdAndUserId(Integer id, Integer userId) {
         Session session = sessionFactory.getCurrentSession();
-        session.createMutationQuery(DELETE_BY_ID_HQL)
+        return session.createMutationQuery(DELETE_BY_ID_HQL)
                 .setParameter("id", id)
+                .setParameter("userId", userId)
                 .executeUpdate();
     }
 }

@@ -4,13 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.aspect.Loggable;
 import org.roadmap.weather.dto.internal.LocationDto;
+import org.roadmap.weather.dto.openweather.response.LocationResponseDto;
 import org.roadmap.weather.dto.request.LocationRequestDto;
 import org.roadmap.weather.dto.view.UserDto;
-import org.roadmap.weather.dto.openweather.response.LocationResponseDto;
-import org.roadmap.weather.entity.Location;
 import org.roadmap.weather.exception.ExceptionMessages;
-import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.exception.GeocodingApiCallException;
+import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.exception.mapper.ExternalApiParseException;
 import org.roadmap.weather.mapper.LocationMapper;
 import org.roadmap.weather.repository.LocationRepository;
@@ -61,13 +60,11 @@ public class LocationService {
     public void delete(String locationId, Integer userId) {
         try {
             Integer id = Integer.valueOf(locationId);
-            List<Location> locations = locationRepository.findByUserId(userId);
-            for (Location location : locations) {
-                if (location.getId().equals(id)) {
-                    locationRepository.deleteById(id);
-                    log.info("User={} deleted location={}", userId, locationId);
-                }
+            int deletedLocations = locationRepository.deleteByIdAndUserId(id, userId);
+            if (deletedLocations == 0) {
+                throw new ValidationException(ExceptionMessages.LOCATION_NOT_FOUND_FOR_USER);
             }
+            log.info("User={} deleted location={}", userId, locationId);
         } catch (NumberFormatException ex) {
             throw new ValidationException(ExceptionMessages.LOCATION_NOT_FOUND_FOR_USER);
         }

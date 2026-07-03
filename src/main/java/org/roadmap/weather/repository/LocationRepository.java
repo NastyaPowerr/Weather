@@ -7,5 +7,5 @@ import java.util.List;
 public interface LocationRepository extends BaseRepository<Location> {
     List<Location> findByUserId(Integer userId);
 
-    void deleteById(Integer id);
+    int deleteByIdAndUserId(Integer id, Integer userId);
 }
