@@ -47,13 +47,7 @@ public class LocationService {
     @CacheEvict(cacheNames = "locations", key = "#user.id()")
     @Transactional
     public void add(LocationRequestDto locationDto, UserDto user) {
-        locationRepository.save(
-                new Location(
-                        locationDto.name(),
-                        user.id(),
-                        locationDto.latitude(),
-                        locationDto.longitude()
-                ));
+        locationRepository.save(locationMapper.toEntity(locationDto, user.id()));
     }
 
     @Cacheable(cacheNames = "locations", key = "#userId")

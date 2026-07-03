@@ -38,7 +38,7 @@ public class AuthService {
         }
         String hashPassword = getEncryptedPassword(userDto.password());
         String username = extractUsername(userDto.username());
-        User userToSave = new User(username, hashPassword);
+        User userToSave = userMapper.toEntity(username, hashPassword);
         try {
             authRepository.save(userToSave);
         } catch (InvalidUserParamsException ex) {

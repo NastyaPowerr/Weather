@@ -7,6 +7,11 @@ import org.roadmap.weather.entity.User;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-    @Mapping(source = "login", target = "username")
+    @Mapping(target = "username", source = "login")
     UserDto toDto(User user);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "login", source = "username")
+    @Mapping(target = "password", source = "hashedPassword")
+    User toEntity(String username, String hashedPassword);
 }

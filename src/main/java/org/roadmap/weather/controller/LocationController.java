@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.roadmap.weather.dto.request.LocationRequestDto;
 import org.roadmap.weather.dto.request.SearchDto;
-import org.roadmap.weather.dto.view.LocationDto;
+import org.roadmap.weather.dto.view.LocationViewDto;
 import org.roadmap.weather.dto.view.UserDto;
 import org.roadmap.weather.mapper.LocationMapper;
 import org.roadmap.weather.service.LocationService;
@@ -36,7 +36,7 @@ public class LocationController {
             model.addAttribute("username", user.username());
             model.addAttribute("isUserAuthorized", true);
         }
-        List<LocationDto> locations = locationMapper.toViewDtoList(
+        List<LocationViewDto> locations = locationMapper.toViewDtoList(
                 locationService.findByName(searchRequest.name())
         );
         model.addAttribute("locations", locations);

@@ -34,11 +34,4 @@ public class Location {
 
     @Column(name = "longitude", nullable = false)
     private BigDecimal longitude;
-
-    public Location(String name, Integer userId, BigDecimal latitude, BigDecimal longitude) {
-        this.name = name;
-        this.userId = userId;
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
 }
