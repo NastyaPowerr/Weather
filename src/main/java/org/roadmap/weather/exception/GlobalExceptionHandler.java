@@ -112,11 +112,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ValidationException.class)
-    public ModelAndView handleValidationException(ValidationException ex) {
+    public ModelAndView handleValidationException(ValidationException ex, RedirectAttributes redirectAttributes) {
         log.warn("Validation error: ", ex);
 
         ModelAndView modelAndView = new ModelAndView("redirect:/");
         modelAndView.setStatus(HttpStatus.BAD_REQUEST);
+        redirectAttributes.addFlashAttribute("error", ex.getMessage());
         return modelAndView;
     }
 
@@ -140,6 +141,19 @@ public class GlobalExceptionHandler {
     public ModelAndView handleGeocodingApiCallException(GeocodingApiCallException ex, HttpServletRequest request) {
         log.warn("External Api error - Geocoding Api call failed: ", ex);
 
+        String uri = request.getRequestURI();
+        if (uri.contains("/search")) {
+            ModelAndView modelAndView = new ModelAndView("search-results");
+            modelAndView.addObject("error", "Weather service temporarily unavailable. Please try again later.");
+            modelAndView.addObject("weathers", List.of());
+
+            String locationName = request.getParameter("name");
+            if (locationName != null) {
+                modelAndView.addObject("locationName", locationName);
+            }
+            addAuthAttributes(request, modelAndView);
+            return modelAndView;
+        }
         ModelAndView modelAndView = new ModelAndView("index");
         modelAndView.addObject("error", "Weather service temporarily unavailable. Please try again later.");
         modelAndView.addObject("weathers", List.of());
