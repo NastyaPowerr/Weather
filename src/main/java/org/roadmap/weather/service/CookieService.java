@@ -2,21 +2,20 @@ package org.roadmap.weather.service;
 
 
 import jakarta.servlet.http.Cookie;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-@Component
+@Service
+@RequiredArgsConstructor
 public class CookieService {
     @Value("${cookie.duration}")
     private int cookieAge;
 
     @Value("${cookie.name}")
     private String cookieName;
-
-    private CookieService() {
-    }
 
     public Cookie create(UUID sessionId) {
         Cookie cookie = new Cookie(cookieName, String.valueOf(sessionId));
