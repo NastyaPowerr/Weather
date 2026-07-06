@@ -12,6 +12,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Component
 @PropertySource("classpath:application.properties")
@@ -67,7 +69,7 @@ public class OpenWeatherClient implements WeatherClient {
     private String createLocationUrl(String locationName) {
         return String.format(
                 LOCATION_URL,
-                locationName,
+                URLEncoder.encode(locationName, StandardCharsets.UTF_8),
                 WEATHER_LIMIT,
                 apiKey,
                 WEATHER_LANGUAGE
