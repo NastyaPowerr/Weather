@@ -10,7 +10,6 @@ import org.roadmap.weather.dto.request.UserRegisterDto;
 import org.roadmap.weather.dto.view.UserDto;
 import org.roadmap.weather.entity.User;
 import org.roadmap.weather.exception.ExceptionMessages;
-import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.exception.user.InvalidUserParamsException;
 import org.roadmap.weather.exception.user.PasswordsDoNotMatchException;
 import org.roadmap.weather.mapper.UserMapper;
@@ -39,11 +38,7 @@ public class AuthService {
         String hashPassword = getEncryptedPassword(userDto.password());
         String username = extractUsername(userDto.username());
         User userToSave = userMapper.toEntity(username, hashPassword);
-        try {
-            authRepository.save(userToSave);
-        } catch (InvalidUserParamsException ex) {
-            throw new ValidationException(ex.getMessage());
-        }
+        authRepository.save(userToSave);
     }
 
     @Loggable
