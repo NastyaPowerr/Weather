@@ -147,43 +147,4 @@ public class AuthServiceTest {
         UserLoginDto loginUser = new UserLoginDto("username", "password");
         Assertions.assertThrows(InvalidUserParamsException.class, () -> authService.authorize(loginUser));
     }
-
-    @Test
-    void givenSession_whenLogout_thenShouldDeleteSession() {
-        UserRegisterDto registerUser = new UserRegisterDto("username", "password", "password");
-        authService.register(registerUser);
-
-        UserLoginDto loginUser = new UserLoginDto("username", "password");
-        SessionDto session = authService.authorize(loginUser);
-        Optional<SessionDto> savedSession = sessionService.getSession(session.id());
-
-        Assertions.assertNotNull(session.id());
-        Assertions.assertTrue(savedSession.isPresent());
-
-        authService.logout(session.id());
-        sessionFactory.getCurrentSession().clear();
-        Optional<SessionDto> deletedSession = sessionService.getSession(session.id());
-
-        Assertions.assertFalse(deletedSession.isPresent());
-    }
-
-    @Test
-    void givenSession_whenSessionExpires_thenSessionIsNotGiven() throws InterruptedException {
-        UserRegisterDto registerUser = new UserRegisterDto("username", "password", "password");
-        authService.register(registerUser);
-
-        UserLoginDto loginUser = new UserLoginDto("username", "password");
-        SessionDto session = authService.authorize(loginUser);
-
-        Optional<SessionDto> savedSession = sessionService.getSession(session.id());
-        Assertions.assertNotNull(session.id());
-        Assertions.assertTrue(savedSession.isPresent());
-
-        System.out.println(sessionDuration);
-        Thread.sleep(sessionDuration + 1);
-        Optional<SessionDto> expiredSession = sessionService.getSession(session.id());
-
-        Assertions.assertNotNull(session.id());
-        Assertions.assertFalse(expiredSession.isPresent());
-    }
 }

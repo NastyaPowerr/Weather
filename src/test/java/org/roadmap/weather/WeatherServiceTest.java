@@ -4,28 +4,25 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.roadmap.weather.client.WeatherClient;
 import org.roadmap.weather.config.TestConfig;
 import org.roadmap.weather.dto.internal.LocationDto;
-import org.roadmap.weather.dto.view.WeatherDto;
 import org.roadmap.weather.dto.openweather.response.WeatherResponseDto;
-import org.roadmap.weather.exception.GeocodingApiCallException;
+import org.roadmap.weather.dto.view.WeatherResult;
+import org.roadmap.weather.exception.client.OpenWeatherApiException;
 import org.roadmap.weather.service.LocationService;
 import org.roadmap.weather.service.WeatherService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -37,7 +34,7 @@ public class WeatherServiceTest {
     private static WeatherResponseDto LONDON_RESPONSE;
 
     @MockitoBean
-    private RestTemplate restTemplate;
+    private WeatherClient weatherClient;
 
     @MockitoBean
     private LocationService locationService;
@@ -87,36 +84,36 @@ public class WeatherServiceTest {
     void givenLocation_whenApiReturnsValidResponse_thenReturnWeathers() {
         locations = List.of(MOSCOW_LOCATION);
 
-        when(restTemplate
-                .getForObject(anyString(), eq(WeatherResponseDto.class)))
+        when(weatherClient.fetchWeather(MOSCOW_LOCATION.latitude(), MOSCOW_LOCATION.longitude()))
                 .thenReturn(MOSCOW_RESPONSE);
-        List<WeatherDto> weathers = weatherService.getWeathersForLocations(locations);
+        WeatherResult weathers = weatherService.getWeathersForLocations(locations);
 
-        Assertions.assertEquals("Moscow", weathers.get(0).name());
-        Assertions.assertEquals(new BigDecimal("6.0"), weathers.get(0).temp());
+        Assertions.assertEquals("Moscow", weathers.weathers().get(0).name());
+        Assertions.assertEquals(new BigDecimal("6.0"), weathers.weathers().get(0).temp());
     }
 
     @Test
     void givenMultipleLocations_whenApiReturnsValidResponse_thenReturnWeathers() {
         locations = List.of(MOSCOW_LOCATION, LONDON_LOCATION);
 
-        when(restTemplate
-                .getForObject(anyString(), eq(WeatherResponseDto.class)))
-                .thenReturn(MOSCOW_RESPONSE, LONDON_RESPONSE);
-        List<WeatherDto> weathers = weatherService.getWeathersForLocations(locations);
+        when(weatherClient.fetchWeather(MOSCOW_LOCATION.latitude(), MOSCOW_LOCATION.longitude()))
+                .thenReturn(MOSCOW_RESPONSE);
+        when(weatherClient.fetchWeather(LONDON_LOCATION.latitude(), LONDON_LOCATION.longitude()))
+                .thenReturn(LONDON_RESPONSE);
+        WeatherResult weathers = weatherService.getWeathersForLocations(locations);
 
-        Assertions.assertEquals(2, weathers.size());
+        Assertions.assertEquals(2, weathers.weathers().size());
 
-        Assertions.assertEquals(new BigDecimal("6.0"), weathers.get(0).temp());
-        Assertions.assertEquals(new BigDecimal("16.8"), weathers.get(1).temp());
+        Assertions.assertEquals(new BigDecimal("6.0"), weathers.weathers().get(0).temp());
+        Assertions.assertEquals(new BigDecimal("16.8"), weathers.weathers().get(1).temp());
     }
 
     @Test
     void givenEmptyLocationList_whenApiReturnsValidResponse_thenReturnEmptyWeatherList() {
         locations = new ArrayList<>();
-        List<WeatherDto> weathers = weatherService.getWeathersForLocations(locations);
+        WeatherResult weathers = weatherService.getWeathersForLocations(locations);
 
-        Assertions.assertEquals(0, weathers.size());
+        Assertions.assertEquals(0, weathers.weathers().size());
     }
 
     @Test
@@ -164,80 +161,44 @@ public class WeatherServiceTest {
 
         locations = List.of(MOSCOW_LOCATION, MOSCOW_LOCATION, MOSCOW_LOCATION, MOSCOW_LOCATION, MOSCOW_LOCATION);
 
-        when(restTemplate.getForObject(anyString(), eq(WeatherResponseDto.class)))
+        when(weatherClient.fetchWeather(MOSCOW_LOCATION.latitude(), MOSCOW_LOCATION.longitude()))
                 .thenReturn(firstResponse, secondResponse, thirdResponse, fourthResponse, MOSCOW_RESPONSE);
-        List<WeatherDto> weathers = weatherService.getWeathersForLocations(locations);
+        WeatherResult weathers = weatherService.getWeathersForLocations(locations);
 
-        Assertions.assertEquals(1, weathers.size());
+        Assertions.assertEquals(1, weathers.weathers().size());
     }
 
     @Test
-    void givenLocation_whenApiReturnsBadRequest_thenThrowException() {
-        locations = List.of(MOSCOW_LOCATION);
+    void givenLocation_whenApiThrowsException_thenAddToFailed() {
+        locations = List.of(MOSCOW_LOCATION, LONDON_LOCATION);
 
-        when(restTemplate
-                .getForObject(anyString(), eq(WeatherResponseDto.class)))
-                .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+        when(weatherClient.fetchWeather(MOSCOW_LOCATION.latitude(), MOSCOW_LOCATION.longitude()))
+                .thenReturn(MOSCOW_RESPONSE);
+        when(weatherClient.fetchWeather(LONDON_LOCATION.latitude(), LONDON_LOCATION.longitude()))
+                .thenThrow(new OpenWeatherApiException("Service unavailable"));
 
-        Assertions.assertThrows(
-                GeocodingApiCallException.class,
-                () -> weatherService.getWeathersForLocations(locations)
-        );
+        WeatherResult result = weatherService.getWeathersForLocations(locations);
+
+        Assertions.assertEquals(1, result.weathers().size());
+        Assertions.assertEquals(1, result.failedWeathers().size());
+        Assertions.assertEquals("Moscow", result.weathers().get(0).name());
+        Assertions.assertEquals("London", result.failedWeathers().get(0));
     }
 
     @Test
-    void givenLocation_whenApiReturnsUnauthorized_thenThrowException() {
-        locations = List.of(MOSCOW_LOCATION);
+    void givenAllLocationsFail_whenApiThrowsException_thenAllFailed() {
+        locations = List.of(MOSCOW_LOCATION, LONDON_LOCATION);
 
-        when(restTemplate
-                .getForObject(anyString(), eq(WeatherResponseDto.class)))
-                .thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
+        when(weatherClient.fetchWeather(MOSCOW_LOCATION.latitude(), MOSCOW_LOCATION.longitude()))
+                .thenThrow(new OpenWeatherApiException("Bad request"));
+        when(weatherClient.fetchWeather(LONDON_LOCATION.latitude(), LONDON_LOCATION.longitude()))
+                .thenThrow(new OpenWeatherApiException("Unauthorized"));
 
-        Assertions.assertThrows(
-                GeocodingApiCallException.class,
-                () -> weatherService.getWeathersForLocations(locations)
-        );
-    }
+        WeatherResult result = weatherService.getWeathersForLocations(locations);
 
-    @Test
-    void givenLocation_whenApiReturnsNotFound_thenThrowException() {
-        locations = List.of(MOSCOW_LOCATION);
-
-        when(restTemplate
-                .getForObject(anyString(), eq(WeatherResponseDto.class)))
-                .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
-
-        Assertions.assertThrows(
-                GeocodingApiCallException.class,
-                () -> weatherService.getWeathersForLocations(locations)
-        );
-    }
-
-    @Test
-    void givenLocation_whenApiReturnsTooManyRequests_thenThrowException() {
-        locations = List.of(MOSCOW_LOCATION);
-
-        when(restTemplate
-                .getForObject(anyString(), eq(WeatherResponseDto.class)))
-                .thenThrow(new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS));
-
-        Assertions.assertThrows(
-                GeocodingApiCallException.class,
-                () -> weatherService.getWeathersForLocations(locations)
-        );
-    }
-
-    @Test
-    void givenLocation_whenApiReturnsUnexpectedError_thenThrowException() {
-        locations = List.of(MOSCOW_LOCATION);
-
-        when(restTemplate
-                .getForObject(anyString(), eq(WeatherResponseDto.class)))
-                .thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
-
-        Assertions.assertThrows(
-                GeocodingApiCallException.class,
-                () -> weatherService.getWeathersForLocations(locations)
-        );
+        Assertions.assertEquals(0, result.weathers().size());
+        Assertions.assertEquals(2, result.failedWeathers().size());
+        Assertions.assertEquals("Moscow", result.failedWeathers().get(0));
+        Assertions.assertEquals("London", result.failedWeathers().get(1));
     }
 }

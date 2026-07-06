@@ -30,7 +30,7 @@ public class LoggingAspect {
             return result;
         } catch (Exception ex) {
             long timeDifference = System.currentTimeMillis() - start;
-            log.warn("{} failed in {}ms. {}", methodName, timeDifference, ex.getMessage());
+            log.warn("{} failed in {}ms.", methodName, timeDifference, ex);
             throw ex;
         }
     }

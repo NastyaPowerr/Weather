@@ -2,49 +2,40 @@ package org.roadmap.weather.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.roadmap.weather.aspect.Loggable;
+import org.roadmap.weather.client.OpenWeatherClient;
+import org.roadmap.weather.client.WeatherClient;
 import org.roadmap.weather.dto.internal.LocationDto;
-import org.roadmap.weather.dto.view.WeatherDto;
 import org.roadmap.weather.dto.openweather.response.WeatherResponseDto;
-import org.roadmap.weather.exception.GeocodingApiCallException;
+import org.roadmap.weather.dto.view.WeatherDto;
+import org.roadmap.weather.dto.view.WeatherResult;
+import org.roadmap.weather.exception.client.WeatherApiException;
 import org.roadmap.weather.exception.mapper.ExternalApiParseException;
 import org.roadmap.weather.mapper.WeatherMapper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 @Service
-@PropertySource("classpath:application.properties")
 @Slf4j
 @RequiredArgsConstructor
 public class WeatherService {
-    private static final String WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=%s&lang=%s";
-    private static final String WEATHER_UNIT = "metric";
-    private static final String WEATHER_LANGUAGE = "ru";
-
     private final LocationService locationService;
     private final WeatherMapper weatherMapper;
-    private final RestTemplate restTemplate;
+    private final WeatherClient weatherClient;
     private final ExecutorService weatherApiExecutor;
 
-    @Value("${weather.api.key}")
-    private String apiKey;
-
-    public List<WeatherDto> getWeathersForUser(Integer userId) {
+    @Loggable
+    public WeatherResult getWeathersForUser(Integer userId) {
         List<LocationDto> locations = locationService.findByUserId(userId);
         return getWeathersForLocations(locations);
     }
 
-    public List<WeatherDto> getWeathersForLocations(List<LocationDto> locations) {
-        long start = System.currentTimeMillis();
-        log.info("Starting: external API call - searching weather for locations...");
-
+    public WeatherResult getWeathersForLocations(List<LocationDto> locations) {
         List<CompletableFuture<Optional<WeatherDto>>> futures = locations.stream()
                 .map(location -> CompletableFuture.supplyAsync(
                         () -> fetchWeather(location),
@@ -52,45 +43,26 @@ public class WeatherService {
                 ))
                 .toList();
 
-        List<WeatherDto> weathers = futures.stream()
-                .map(CompletableFuture::join)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
+        List<WeatherDto> weathers = new ArrayList<>();
+        List<String> failedWeathers = new ArrayList<>();
 
-        if (!locations.isEmpty() && weathers.isEmpty()) {
-            throw new GeocodingApiCallException("Unable to fetch weather data. Please try again later.");
+        for (int i = 0; i < futures.size(); i++) {
+            Optional<WeatherDto> result = futures.get(i).join();
+            if (result.isPresent()) {
+                weathers.add(result.get());
+            } else {
+                failedWeathers.add(locations.get(i).name());
+            }
         }
-        long difference = System.currentTimeMillis() - start;
-        log.info("Finished: API call - searching weather for locations. Found {} in {}ms", weathers.size(), difference);
-        return weathers;
+        return new WeatherResult(weathers, failedWeathers);
     }
 
     private Optional<WeatherDto> fetchWeather(LocationDto location) {
         try {
-            String url = createUrl(location);
-            WeatherResponseDto response = restTemplate.getForObject(url, WeatherResponseDto.class);
+            WeatherResponseDto response = weatherClient.fetchWeather(location.latitude(), location.longitude());
             return Optional.of(weatherMapper.toWeather(location, response));
-        } catch (RestClientException | ExternalApiParseException ex) {
-            log.warn(
-                    "Failed to fetch weather for location={}, {}, {}. {}",
-                    location.name(),
-                    location.latitude(),
-                    location.longitude(),
-                    ex.getMessage()
-            );
+        } catch (WeatherApiException | ExternalApiParseException ex) {
+            return Optional.empty();
         }
-        return Optional.empty();
-    }
-
-    private String createUrl(LocationDto location) {
-        return String.format(
-                WEATHER_URL,
-                location.latitude(),
-                location.longitude(),
-                apiKey,
-                WEATHER_UNIT,
-                WEATHER_LANGUAGE
-        );
     }
 }

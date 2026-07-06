@@ -17,21 +17,22 @@ import static org.mockito.Mockito.mock;
 @ComponentScan("org.roadmap.weather.service")
 @ComponentScan("org.roadmap.weather.repository")
 @ComponentScan("org.roadmap.weather.mapper")
+@ComponentScan("org.roadmap.weather.client")
 @PropertySource("classpath:application-test.properties")
 @Import(DatabaseConfig.class)
 public class TestConfig {
     @Bean
-    public RestTemplate restTemplate() {
+    static RestTemplate restTemplate() {
         return mock(RestTemplate.class);
     }
 
     @Bean
-    public MethodValidationPostProcessor methodValidationPostProcessor() {
+    static MethodValidationPostProcessor methodValidationPostProcessor() {
         return new MethodValidationPostProcessor();
     }
 
     @Bean(destroyMethod = "shutdown")
-    public ExecutorService weatherApiExecutor() {
+    static ExecutorService weatherApiExecutor() {
         return Executors.newFixedThreadPool(4);
     }
 }

@@ -98,13 +98,15 @@ public class GlobalExceptionHandler {
         modelAndView.addObject("error", errorMessage);
 
         String uri = request.getRequestURI();
-        log.debug("User could not {}. {}", uri, errors);
+        log.debug("User could not {}. {}", uri, errors, ex);
 
         Object weathers = request.getAttribute("weathers");
         if (weathers instanceof List<?>) {
             modelAndView.addObject("weathers", weathers);
+            modelAndView.addObject("failedWeathers", List.of());
         } else {
             modelAndView.addObject("weathers", List.of());
+            modelAndView.addObject("failedWeathers", List.of());
         }
         addSavedUsernameField(modelAndView, request);
         addAuthAttributes(request, modelAndView);

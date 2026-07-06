@@ -23,7 +23,6 @@ public class SessionService {
     @Value("${session.duration}")
     private long sessionDuration;
 
-
     @Loggable
     @Transactional
     public SessionDto create(Integer userId) {
@@ -36,6 +35,7 @@ public class SessionService {
     }
 
     @Transactional
+    @Loggable
     public void deleteSession(UUID sessionId) {
         sessionRepository.deleteById(sessionId);
     }

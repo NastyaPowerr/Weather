@@ -58,6 +58,10 @@
                     </div>
                 </div>
                 <div class="row">
+                    <div th:if="${!failedWeathers.isEmpty()}" class="alert alert-danger">
+                        Weather unavailable for: <span th:each="name : ${failedWeathers}"
+                                                       th:text="${name + ' '}"></span>
+                    </div>
                     <div th:each="weather : ${weathers}" class="col-12 col-lg-3 col-md-6 mb-4">
                         <div class="card h-100 position-relative weather-card">
                             <div class="position-absolute weather-card-delete-form">
