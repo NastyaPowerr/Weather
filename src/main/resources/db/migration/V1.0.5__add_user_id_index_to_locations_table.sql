@@ -1,0 +1,1 @@
+CREATE INDEX idx_locations_user_id ON locations (user_id)
