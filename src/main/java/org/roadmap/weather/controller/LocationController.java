@@ -7,7 +7,7 @@ import org.roadmap.weather.dto.request.SearchDto;
 import org.roadmap.weather.dto.view.LocationViewDto;
 import org.roadmap.weather.dto.view.UserDto;
 import org.roadmap.weather.mapper.LocationMapper;
-import org.roadmap.weather.service.LocationService;
+import org.roadmap.weather.service.LocationApi;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +21,7 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class LocationController {
-    private final LocationService locationService;
+    private final LocationApi locationApi;
     private final LocationMapper locationMapper;
 
     @GetMapping("/search")
@@ -37,7 +37,7 @@ public class LocationController {
             model.addAttribute("isUserAuthorized", true);
         }
         List<LocationViewDto> locations = locationMapper.toViewDtoList(
-                locationService.findByName(searchRequest.name())
+                locationApi.findByName(searchRequest.name())
         );
         model.addAttribute("locations", locations);
         model.addAttribute("locationName", searchRequest.name());
@@ -49,7 +49,7 @@ public class LocationController {
             @Valid @ModelAttribute LocationRequestDto location,
             @RequestAttribute("user") UserDto user
     ) {
-        locationService.add(location, user);
+        locationApi.add(location, user);
         return "redirect:/";
     }
 
@@ -58,7 +58,7 @@ public class LocationController {
             @RequestParam String locationId,
             @RequestAttribute("user") UserDto user
     ) {
-        locationService.delete(locationId, user.id());
+        locationApi.delete(locationId, user.id());
         return "redirect:/";
     }
 }

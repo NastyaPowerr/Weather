@@ -1,9 +1,8 @@
-package org.roadmap.weather.service;
+package org.roadmap.weather.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.roadmap.weather.aspect.Loggable;
-import org.roadmap.weather.client.OpenWeatherClient;
 import org.roadmap.weather.client.WeatherClient;
 import org.roadmap.weather.dto.internal.LocationDto;
 import org.roadmap.weather.dto.openweather.response.WeatherResponseDto;
@@ -12,6 +11,7 @@ import org.roadmap.weather.dto.view.WeatherResult;
 import org.roadmap.weather.exception.client.WeatherApiException;
 import org.roadmap.weather.exception.mapper.ExternalApiParseException;
 import org.roadmap.weather.mapper.WeatherMapper;
+import org.roadmap.weather.service.WeatherApi;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutorService;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class WeatherService {
+public class WeatherService implements WeatherApi {
     private final LocationService locationService;
     private final WeatherMapper weatherMapper;
     private final WeatherClient weatherClient;

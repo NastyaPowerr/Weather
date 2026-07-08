@@ -10,8 +10,8 @@ import org.roadmap.weather.dto.internal.LocationDto;
 import org.roadmap.weather.dto.openweather.response.WeatherResponseDto;
 import org.roadmap.weather.dto.view.WeatherResult;
 import org.roadmap.weather.exception.client.OpenWeatherApiException;
-import org.roadmap.weather.service.LocationService;
-import org.roadmap.weather.service.WeatherService;
+import org.roadmap.weather.service.LocationApi;
+import org.roadmap.weather.service.WeatherApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -20,8 +20,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static org.mockito.Mockito.when;
 
@@ -37,10 +35,10 @@ public class WeatherServiceTest {
     private WeatherClient weatherClient;
 
     @MockitoBean
-    private LocationService locationService;
+    private LocationApi locationApi;
 
     @Autowired
-    private WeatherService weatherService;
+    private WeatherApi weatherApi;
 
     private List<LocationDto> locations;
 
@@ -86,7 +84,7 @@ public class WeatherServiceTest {
 
         when(weatherClient.fetchWeather(MOSCOW_LOCATION.latitude(), MOSCOW_LOCATION.longitude()))
                 .thenReturn(MOSCOW_RESPONSE);
-        WeatherResult weathers = weatherService.getWeathersForLocations(locations);
+        WeatherResult weathers = weatherApi.getWeathersForLocations(locations);
 
         Assertions.assertEquals("Moscow", weathers.weathers().get(0).name());
         Assertions.assertEquals(new BigDecimal("6.0"), weathers.weathers().get(0).temp());
@@ -100,7 +98,7 @@ public class WeatherServiceTest {
                 .thenReturn(MOSCOW_RESPONSE);
         when(weatherClient.fetchWeather(LONDON_LOCATION.latitude(), LONDON_LOCATION.longitude()))
                 .thenReturn(LONDON_RESPONSE);
-        WeatherResult weathers = weatherService.getWeathersForLocations(locations);
+        WeatherResult weathers = weatherApi.getWeathersForLocations(locations);
 
         Assertions.assertEquals(2, weathers.weathers().size());
 
@@ -111,7 +109,7 @@ public class WeatherServiceTest {
     @Test
     void givenEmptyLocationList_whenApiReturnsValidResponse_thenReturnEmptyWeatherList() {
         locations = new ArrayList<>();
-        WeatherResult weathers = weatherService.getWeathersForLocations(locations);
+        WeatherResult weathers = weatherApi.getWeathersForLocations(locations);
 
         Assertions.assertEquals(0, weathers.weathers().size());
     }
@@ -163,7 +161,7 @@ public class WeatherServiceTest {
 
         when(weatherClient.fetchWeather(MOSCOW_LOCATION.latitude(), MOSCOW_LOCATION.longitude()))
                 .thenReturn(firstResponse, secondResponse, thirdResponse, fourthResponse, MOSCOW_RESPONSE);
-        WeatherResult weathers = weatherService.getWeathersForLocations(locations);
+        WeatherResult weathers = weatherApi.getWeathersForLocations(locations);
 
         Assertions.assertEquals(1, weathers.weathers().size());
     }
@@ -177,7 +175,7 @@ public class WeatherServiceTest {
         when(weatherClient.fetchWeather(LONDON_LOCATION.latitude(), LONDON_LOCATION.longitude()))
                 .thenThrow(new OpenWeatherApiException("Service unavailable"));
 
-        WeatherResult result = weatherService.getWeathersForLocations(locations);
+        WeatherResult result = weatherApi.getWeathersForLocations(locations);
 
         Assertions.assertEquals(1, result.weathers().size());
         Assertions.assertEquals(1, result.failedWeathers().size());
@@ -194,7 +192,7 @@ public class WeatherServiceTest {
         when(weatherClient.fetchWeather(LONDON_LOCATION.latitude(), LONDON_LOCATION.longitude()))
                 .thenThrow(new OpenWeatherApiException("Unauthorized"));
 
-        WeatherResult result = weatherService.getWeathersForLocations(locations);
+        WeatherResult result = weatherApi.getWeathersForLocations(locations);
 
         Assertions.assertEquals(0, result.weathers().size());
         Assertions.assertEquals(2, result.failedWeathers().size());

@@ -1,4 +1,4 @@
-package org.roadmap.weather.service;
+package org.roadmap.weather.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.roadmap.weather.aspect.Loggable;
@@ -6,6 +6,7 @@ import org.roadmap.weather.dto.internal.SessionDto;
 import org.roadmap.weather.entity.SessionEntity;
 import org.roadmap.weather.mapper.SessionMapper;
 import org.roadmap.weather.repository.SessionRepository;
+import org.roadmap.weather.service.SessionApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class SessionService {
+public class SessionService implements SessionApi {
     private final SessionRepository sessionRepository;
     private final SessionMapper sessionMapper;
 

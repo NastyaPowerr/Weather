@@ -1,4 +1,4 @@
-package org.roadmap.weather.service;
+package org.roadmap.weather.service.impl;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import jakarta.validation.Valid;
@@ -14,6 +14,7 @@ import org.roadmap.weather.exception.user.InvalidUserParamsException;
 import org.roadmap.weather.exception.user.PasswordsDoNotMatchException;
 import org.roadmap.weather.mapper.UserMapper;
 import org.roadmap.weather.repository.AuthRepository;
+import org.roadmap.weather.service.AuthApi;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ import java.util.UUID;
 @Service
 @Validated
 @RequiredArgsConstructor
-public class AuthService {
+public class AuthService implements AuthApi {
     private final SessionService sessionService;
     private final AuthRepository authRepository;
     private final UserMapper userMapper;

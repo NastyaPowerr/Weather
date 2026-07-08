@@ -1,7 +1,7 @@
 package org.roadmap.weather.scheduler;
 
 import lombok.RequiredArgsConstructor;
-import org.roadmap.weather.service.SessionService;
+import org.roadmap.weather.service.impl.SessionService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 

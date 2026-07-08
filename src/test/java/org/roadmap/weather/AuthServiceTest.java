@@ -13,8 +13,9 @@ import org.roadmap.weather.dto.request.UserRegisterDto;
 import org.roadmap.weather.entity.User;
 import org.roadmap.weather.exception.user.InvalidUserParamsException;
 import org.roadmap.weather.exception.user.UserAlreadyExistsException;
-import org.roadmap.weather.service.AuthService;
-import org.roadmap.weather.service.SessionService;
+import org.roadmap.weather.service.AuthApi;
+import org.roadmap.weather.service.SessionApi;
+import org.roadmap.weather.service.impl.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.Rollback;
@@ -33,10 +34,10 @@ import java.util.Optional;
 @Rollback
 public class AuthServiceTest {
     @Autowired
-    private AuthService authService;
+    private AuthApi authApi;
 
     @Autowired
-    private SessionService sessionService;
+    private SessionApi sessionApi;
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -48,7 +49,7 @@ public class AuthServiceTest {
     void givenUser_whenRegister_thenShouldBeSavedInDatabase() {
         UserRegisterDto user = new UserRegisterDto("username", "password", "password");
 
-        authService.register(user);
+        authApi.register(user);
         Session session = sessionFactory.getCurrentSession();
         Optional<User> savedUser = session.createQuery(
                         """
@@ -65,13 +66,13 @@ public class AuthServiceTest {
     @Test
     void givenNullLoginUser_whenRegister_thenShouldThrowException() {
         UserRegisterDto user = new UserRegisterDto(null, "password", "password");
-        Assertions.assertThrows(ConstraintViolationException.class, () -> authService.register(user));
+        Assertions.assertThrows(ConstraintViolationException.class, () -> authApi.register(user));
     }
 
     @Test
     void givenNullPasswordUser_whenRegister_thenShouldThrowException() {
         UserRegisterDto user = new UserRegisterDto("username", null, null);
-        Assertions.assertThrows(ConstraintViolationException.class, () -> authService.register(user));
+        Assertions.assertThrows(ConstraintViolationException.class, () -> authApi.register(user));
     }
 
     @Test
@@ -79,8 +80,8 @@ public class AuthServiceTest {
         UserRegisterDto firstUser = new UserRegisterDto("username", "password", "password");
         UserRegisterDto secondUser = new UserRegisterDto("username", "password", "password");
 
-        authService.register(firstUser);
-        Assertions.assertThrows(UserAlreadyExistsException.class, () -> authService.register(secondUser));
+        authApi.register(firstUser);
+        Assertions.assertThrows(UserAlreadyExistsException.class, () -> authApi.register(secondUser));
     }
 
     // осознанно пошла через рефлексию для учения рефлексии :)
@@ -88,7 +89,7 @@ public class AuthServiceTest {
     void givenUser_whenRegister_thenPasswordShouldBeHashed() {
         UserRegisterDto user = new UserRegisterDto("username", "password", "password");
 
-        authService.register(user);
+        authApi.register(user);
 
         Session session = sessionFactory.getCurrentSession();
         Optional<User> savedUser = session.createQuery(
@@ -110,7 +111,7 @@ public class AuthServiceTest {
             );
             isPasswordVerified.setAccessible(true);
             boolean verified = (boolean) isPasswordVerified.invoke(
-                    authService,
+                    authApi,
                     user.password().toCharArray(),
                     savedUser.get().getPassword()
             );
@@ -123,12 +124,12 @@ public class AuthServiceTest {
     @Test
     void givenUser_whenAuthorize_thenShouldGiveSessionAndSaveInDatabase() {
         UserRegisterDto registerUser = new UserRegisterDto("username", "password", "password");
-        authService.register(registerUser);
+        authApi.register(registerUser);
 
         UserLoginDto loginUser = new UserLoginDto("username", "password");
-        SessionDto session = authService.authorize(loginUser);
+        SessionDto session = authApi.authorize(loginUser);
 
-        Optional<SessionDto> savedSession = sessionService.getSession(session.id());
+        Optional<SessionDto> savedSession = sessionApi.getSession(session.id());
         Assertions.assertNotNull(session.id());
         Assertions.assertTrue(savedSession.isPresent());
     }
@@ -136,15 +137,15 @@ public class AuthServiceTest {
     @Test
     void givenUser_whenAuthorizeWithWrongPassword_thenShouldThrowException() {
         UserRegisterDto registerUser = new UserRegisterDto("username", "password", "password");
-        authService.register(registerUser);
+        authApi.register(registerUser);
 
         UserLoginDto loginUser = new UserLoginDto("username", "wrong_password");
-        Assertions.assertThrows(InvalidUserParamsException.class, () -> authService.authorize(loginUser));
+        Assertions.assertThrows(InvalidUserParamsException.class, () -> authApi.authorize(loginUser));
     }
 
     @Test
     void givenNotSavedUser_whenAuthorize_thenShouldThrowException() {
         UserLoginDto loginUser = new UserLoginDto("username", "password");
-        Assertions.assertThrows(InvalidUserParamsException.class, () -> authService.authorize(loginUser));
+        Assertions.assertThrows(InvalidUserParamsException.class, () -> authApi.authorize(loginUser));
     }
 }

@@ -1,8 +1,9 @@
-package org.roadmap.weather.service;
+package org.roadmap.weather.service.impl;
 
 
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
+import org.roadmap.weather.service.CookieApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class CookieService {
+public class CookieService implements CookieApi {
     @Value("${cookie.duration}")
     private int cookieAge;
 

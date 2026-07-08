@@ -11,14 +11,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.roadmap.weather.client.WeatherClient;
 import org.roadmap.weather.dto.internal.LocationDto;
 import org.roadmap.weather.dto.openweather.response.LocationResponseDto;
-import org.roadmap.weather.exception.GeocodingApiCallException;
 import org.roadmap.weather.exception.client.OpenWeatherApiException;
 import org.roadmap.weather.mapper.LocationMapper;
 import org.roadmap.weather.repository.LocationRepository;
-import org.roadmap.weather.service.LocationService;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
+import org.roadmap.weather.service.LocationApi;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -36,7 +32,7 @@ public class LocationServiceTest {
     private WeatherClient weatherClient;
 
     @InjectMocks
-    private LocationService locationService;
+    private LocationApi locationApi;
 
     @Spy
     private LocationMapper locationMapper = Mappers.getMapper(LocationMapper.class);
@@ -56,7 +52,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenReturn(new LocationResponseDto[]{response});
 
-        List<LocationDto> locations = locationService.findByName("Moscow");
+        List<LocationDto> locations = locationApi.findByName("Moscow");
         LocationDto location = locations.get(0);
 
         Assertions.assertEquals("Moscow", location.name());
@@ -83,7 +79,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenReturn(new LocationResponseDto[]{firstMoscow, secondMoscow});
 
-        List<LocationDto> locations = locationService.findByName("Moscow");
+        List<LocationDto> locations = locationApi.findByName("Moscow");
         LocationDto firstFoundMoscow = locations.get(0);
         LocationDto secondFoundMoscow = locations.get(1);
 
@@ -104,7 +100,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenReturn(new LocationResponseDto[0]);
 
-        List<LocationDto> locations = locationService.findByName("Moscow");
+        List<LocationDto> locations = locationApi.findByName("Moscow");
         Assertions.assertTrue(locations.isEmpty());
     }
 
@@ -113,7 +109,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenReturn(null);
 
-        List<LocationDto> locations = locationService.findByName("Moscow");
+        List<LocationDto> locations = locationApi.findByName("Moscow");
         Assertions.assertTrue(locations.isEmpty());
     }
 
@@ -147,7 +143,7 @@ public class LocationServiceTest {
                         responseWithEmptyLongitude
                 });
 
-        List<LocationDto> locations = locationService.findByName("Moscow");
+        List<LocationDto> locations = locationApi.findByName("Moscow");
         Assertions.assertEquals(0, locations.size());
     }
 
@@ -156,7 +152,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenThrow(new OpenWeatherApiException("Bad Request"));
 
-        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationService.findByName("Moscow"));
+        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationApi.findByName("Moscow"));
     }
 
     @Test
@@ -164,7 +160,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenThrow(new OpenWeatherApiException("Unauthorized"));
 
-        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationService.findByName("Moscow"));
+        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationApi.findByName("Moscow"));
     }
 
     @Test
@@ -172,7 +168,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenThrow(new OpenWeatherApiException("Not found"));
 
-        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationService.findByName("Moscow"));
+        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationApi.findByName("Moscow"));
     }
 
     @Test
@@ -180,7 +176,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenThrow(new OpenWeatherApiException("Too many requests"));
 
-        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationService.findByName("Moscow"));
+        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationApi.findByName("Moscow"));
     }
 
     @Test
@@ -188,6 +184,6 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenThrow(new OpenWeatherApiException("Internal server error"));
 
-        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationService.findByName("Moscow"));
+        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationApi.findByName("Moscow"));
     }
 }

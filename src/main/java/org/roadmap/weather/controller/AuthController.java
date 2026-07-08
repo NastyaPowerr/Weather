@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.roadmap.weather.dto.internal.SessionDto;
 import org.roadmap.weather.dto.request.UserLoginDto;
 import org.roadmap.weather.dto.request.UserRegisterDto;
-import org.roadmap.weather.service.AuthService;
-import org.roadmap.weather.service.CookieService;
+import org.roadmap.weather.service.AuthApi;
+import org.roadmap.weather.service.CookieApi;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,8 +21,8 @@ import java.util.UUID;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final AuthService authService;
-    private final CookieService cookieService;
+    private final AuthApi authApi;
+    private final CookieApi cookieApi;
 
     @GetMapping("/sign-up")
     public String register() {
@@ -31,7 +31,7 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public String register(@Valid UserRegisterDto user) {
-        authService.register(user);
+        authApi.register(user);
         return "redirect:/";
     }
 
@@ -42,8 +42,8 @@ public class AuthController {
 
     @PostMapping("/sign-in")
     public String login(@Valid UserLoginDto user, HttpServletResponse response) {
-        SessionDto session = authService.authorize(user);
-        Cookie cookie = cookieService.create(session.id());
+        SessionDto session = authApi.authorize(user);
+        Cookie cookie = cookieApi.create(session.id());
         response.addCookie(cookie);
         return "redirect:/";
     }
@@ -54,9 +54,9 @@ public class AuthController {
             HttpServletResponse response
     ) {
         if (sessionId != null) {
-            authService.logout(sessionId);
+            authApi.logout(sessionId);
         }
-        response.addCookie(cookieService.delete());
+        response.addCookie(cookieApi.delete());
         return "redirect:/";
     }
 }
