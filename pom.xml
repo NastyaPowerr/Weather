@@ -34,6 +34,7 @@
         <logback-classic.version>1.5.32</logback-classic.version>
         <hikariCP.version>7.0.2</hikariCP.version>
         <jboss-logging.version>3.6.3.Final</jboss-logging.version>
+        <assertJ.version>3.27.7</assertJ.version>
 
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok.version>1.18.42</lombok.version>
@@ -212,6 +213,12 @@
             <artifactId>lombok-mapstruct-binding</artifactId>
             <version>${lombok-mapstruct-binding.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertJ.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

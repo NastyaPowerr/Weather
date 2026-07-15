@@ -11,16 +11,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.roadmap.weather.client.WeatherClient;
 import org.roadmap.weather.dto.internal.LocationDto;
 import org.roadmap.weather.dto.openweather.response.LocationResponseDto;
+import org.roadmap.weather.dto.view.UserDto;
+import org.roadmap.weather.entity.Location;
+import org.roadmap.weather.exception.ValidationException;
 import org.roadmap.weather.exception.client.OpenWeatherApiException;
 import org.roadmap.weather.mapper.LocationMapper;
 import org.roadmap.weather.repository.LocationRepository;
-import org.roadmap.weather.service.LocationApi;
+import org.roadmap.weather.service.impl.LocationService;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,10 +38,13 @@ public class LocationServiceTest {
     private WeatherClient weatherClient;
 
     @InjectMocks
-    private LocationApi locationApi;
+    private LocationService locationService;
 
     @Spy
     private LocationMapper locationMapper = Mappers.getMapper(LocationMapper.class);
+
+    private static final UserDto FIRST_USER = new UserDto(1, "first");
+    private static final UserDto SECOND_USER = new UserDto(2, "second");
 
     private final Map<String, String> localNames = new HashMap<>();
 
@@ -46,13 +55,12 @@ public class LocationServiceTest {
                 new BigDecimal("55.7504461"),
                 new BigDecimal("37.6174943"),
                 localNames
-
         );
 
         when(weatherClient.fetchLocations("Moscow"))
                 .thenReturn(new LocationResponseDto[]{response});
 
-        List<LocationDto> locations = locationApi.findByName("Moscow");
+        List<LocationDto> locations = locationService.findByName("Moscow");
         LocationDto location = locations.get(0);
 
         Assertions.assertEquals("Moscow", location.name());
@@ -79,7 +87,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenReturn(new LocationResponseDto[]{firstMoscow, secondMoscow});
 
-        List<LocationDto> locations = locationApi.findByName("Moscow");
+        List<LocationDto> locations = locationService.findByName("Moscow");
         LocationDto firstFoundMoscow = locations.get(0);
         LocationDto secondFoundMoscow = locations.get(1);
 
@@ -100,7 +108,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenReturn(new LocationResponseDto[0]);
 
-        List<LocationDto> locations = locationApi.findByName("Moscow");
+        List<LocationDto> locations = locationService.findByName("Moscow");
         Assertions.assertTrue(locations.isEmpty());
     }
 
@@ -109,7 +117,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenReturn(null);
 
-        List<LocationDto> locations = locationApi.findByName("Moscow");
+        List<LocationDto> locations = locationService.findByName("Moscow");
         Assertions.assertTrue(locations.isEmpty());
     }
 
@@ -143,7 +151,7 @@ public class LocationServiceTest {
                         responseWithEmptyLongitude
                 });
 
-        List<LocationDto> locations = locationApi.findByName("Moscow");
+        List<LocationDto> locations = locationService.findByName("Moscow");
         Assertions.assertEquals(0, locations.size());
     }
 
@@ -152,7 +160,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenThrow(new OpenWeatherApiException("Bad Request"));
 
-        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationApi.findByName("Moscow"));
+        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationService.findByName("Moscow"));
     }
 
     @Test
@@ -160,7 +168,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenThrow(new OpenWeatherApiException("Unauthorized"));
 
-        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationApi.findByName("Moscow"));
+        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationService.findByName("Moscow"));
     }
 
     @Test
@@ -168,7 +176,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenThrow(new OpenWeatherApiException("Not found"));
 
-        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationApi.findByName("Moscow"));
+        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationService.findByName("Moscow"));
     }
 
     @Test
@@ -176,7 +184,7 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenThrow(new OpenWeatherApiException("Too many requests"));
 
-        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationApi.findByName("Moscow"));
+        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationService.findByName("Moscow"));
     }
 
     @Test
@@ -184,6 +192,34 @@ public class LocationServiceTest {
         when(weatherClient.fetchLocations("Moscow"))
                 .thenThrow(new OpenWeatherApiException("Internal server error"));
 
-        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationApi.findByName("Moscow"));
+        Assertions.assertThrows(OpenWeatherApiException.class, () -> locationService.findByName("Moscow"));
+    }
+
+    @Test
+    void givenUserLocation_shouldDeleteOwnLocation() {
+        locationRepository.save(new Location(
+                1,
+                "loc",
+                FIRST_USER.id(),
+                new BigDecimal("55.7504461"),
+                new BigDecimal("37.6174943")
+        ));
+
+        when(locationRepository.deleteByIdAndUserId(1, FIRST_USER.id())).thenReturn(1);
+        assertThatCode(() -> locationService.delete("1", FIRST_USER.id()))
+                .doesNotThrowAnyException();
+        verify(locationRepository).deleteByIdAndUserId(1, FIRST_USER.id());
+    }
+
+    @Test
+    void givenUserLocation_shouldThrowWhenOtherUserDeleteLocation() {
+        when(locationRepository.deleteByIdAndUserId(1, SECOND_USER.id())).thenReturn(0);
+        assertThatThrownBy(() -> locationService.delete("1", SECOND_USER.id()))
+                .isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void givenUserLocation_whenDeleteIncorrectId_shouldThrowException() {
+        Assertions.assertThrows(ValidationException.class, () -> locationService.delete("abc", FIRST_USER.id()));
     }
 }
